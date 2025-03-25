@@ -40,20 +40,12 @@ const Register = () => {
         validationSchema: validationSchema,
         onSubmit: async (values, { setErrors }) => {
             try {
-                const response = await registerUser(values); // Register the user
-                const {jwt} = response; // Get the JWT token
-                localStorage.setItem('token', jwt); // Store the JWT token in localStorage
-
-                // Fetch user data using the JWT
-                const userResponse = await getUserData(jwt); // Fetch the user data with the JWT token
-                const user = userResponse.data; // Assume the user data is returned here
-                localStorage.setItem('user', JSON.stringify(user)); // Store user data in localStorage
-
-                navigate('/login'); // Navigate to login after successful registration
+                const response = await registerUser(values);
+                navigate('/login');
             } catch (err) {
-                setErrors({submit: err.message}); // Show error if registration fails
+                setErrors({ submit: err.message });
             }
-        }
+        },
     });
 
     return (
