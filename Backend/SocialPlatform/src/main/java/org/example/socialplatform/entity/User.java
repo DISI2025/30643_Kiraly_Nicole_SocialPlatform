@@ -23,7 +23,7 @@ public class User implements Serializable {
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     private UUID id;
 
-    @Column(name = "firstName", nullable = false)
+    @Column(name = "firstName", nullable = false, unique = true)
     private String firstName;
 
     @Column(name = "lastName", nullable = false)

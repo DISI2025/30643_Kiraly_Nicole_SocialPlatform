@@ -34,7 +34,7 @@ public class UserService {
     @Cacheable(value = "users")
     public List<UserDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
-        return users.stream().map(UserBuilder::toUserDTO).collect(Collectors.toList());
+        return users.stream().map(UserBuilder::toUserDTO).toList();
     }
 
     @Cacheable(value = "users", key = "#id")
