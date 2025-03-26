@@ -39,13 +39,13 @@ public class PostService {
         this.userService = userService;
     }
 
-    @Cacheable(value = "posts")
+    @Cacheable(value = "posts", key = "'postsList'")
     public List<PostDTO> getAllPosts() {
         List<Post> posts = postRepository.findAll();
         return posts.stream().map(PostBuilder::toPostDTO).collect(Collectors.toList());
     }
 
-    @Cacheable(value = "posts", key = "#id")
+    @Cacheable(value = "posts", key = "#id.toString()")
     public PostDTO getPostById(UUID id) {
         Optional<Post> postOptional = postRepository.findById(id);
         if(!postOptional.isPresent()) {
@@ -57,6 +57,7 @@ public class PostService {
     }
 
     @Transactional
+    @CacheEvict(value = "posts", key = "'postsList'")
     public UUID insert(PostRequestDTO postDTO) {
         Post post = PostBuilder.toPost(postDTO);
         Optional<User> user = userRepository.findById(postDTO.getUserId());
@@ -68,7 +69,8 @@ public class PostService {
         return post.getId();
     }
 
-    @CachePut(value = "posts", key = "#id")
+    @CachePut(value = "posts", key = "#id.toString()")
+    @CacheEvict(value = "posts", key = "'postsList'")
     @Transactional
     public UUID update(UUID id, PostDTO postDTO) {
         Optional<Post> postOptional = postRepository.findById(id);
@@ -82,7 +84,7 @@ public class PostService {
         return post.getId();
     }
 
-    @CacheEvict(value = "posts", key = "#id")
+    @CacheEvict(value = "posts", allEntries = true)
     @Transactional
     public void delete(UUID id) {
         Optional<Post> postOptional = postRepository.findById(id);
