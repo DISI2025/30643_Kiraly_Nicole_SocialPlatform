@@ -31,26 +31,16 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    @Cacheable(value = "users", key = "'usersList'")
+    @Cacheable(value = "users")
     public List<UserDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
         return users.stream().map(UserBuilder::toUserDTO).toList();
     }
 
-    @Cacheable(value = "users", key = "#email")
-    public UserDTO findByEmail(String email) {
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        return userOptional.map(UserBuilder::toUserDTO)
-                .orElseThrow(() -> {
-                    LOGGER.error("User with email {} not found", email);
-                    return new RuntimeException("User with email " + email + " not found");
-                });
-    }
-
-    @Cacheable(value = "users", key = "#id.toString()")
+    @Cacheable(value = "users", key = "#id")
     public UserDTO getUserById(UUID id) {
         Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isEmpty()) {
+        if(!userOptional.isPresent()) {
             LOGGER.error("User with id {} not found", id);
             throw new RuntimeException("User with id " + id + " not found");
         }
@@ -59,7 +49,6 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = "users", key = "'usersList'")
     public UUID insert(UserDTO userDTO) {
         User user = UserBuilder.toUser(userDTO);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
@@ -68,12 +57,11 @@ public class UserService {
         return user.getId();
     }
 
-    @CachePut(value = "users", key = "#id.toString()")
-    @CacheEvict(value = "users", key = "'users'")
+    @CachePut(value = "users", key = "#id")
     @Transactional
     public UUID update(UUID id, UserDTO userDTO) {
         Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isEmpty()) {
+        if(!userOptional.isPresent()) {
             LOGGER.error("User with id {} not found", id);
             throw new RuntimeException("User with id " + id + " not found");
         }
@@ -84,11 +72,11 @@ public class UserService {
         return user.getId();
     }
 
-    @CacheEvict(value = "users", allEntries = true)
+    @CacheEvict(value = "users", key = "#id")
     @Transactional
     public void delete(UUID id) {
         Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isEmpty()) {
+        if(!userOptional.isPresent()) {
             LOGGER.error("User with id {} not found", id);
             throw new RuntimeException("User with id " + id + " not found");
         }
