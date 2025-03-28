@@ -44,3 +44,6 @@ yarn-error.log*
 # Dependency lock files
 package-lock.json
 yarn.lock
+
+# Explicitly allow PDF files
+!*.pdf
