@@ -10,8 +10,8 @@ body {
 /* ========== CONTAINER ========== */
 .user-management {
     padding: 20px;
-    max-width: 95vw;
-    width: 300%;
+    width: 80vw;
+    /*width: 100%;*/
     margin: 40px auto;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
@@ -61,8 +61,8 @@ body {
 /* ========== USER CARD GRID ========== */
 .user-card-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* More columns */
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(22vw, 1fr)); /* More columns */
+    gap: 50px;
     margin-top: 25px;
     padding: 20px;
 }
@@ -78,7 +78,7 @@ body {
     border-left: 6px solid #555;
     position: relative;
     overflow: hidden;
-    width: 80%;
+    width: 90%;
     height: 80%;
 }
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Trash2, Edit, PlusCircle } from 'lucide-react';
-import { getUserData, creatUser } from '../assets/api_user.jsx';  // Assuming addUser API is defined
+import { PlusCircle } from 'lucide-react';
+import {getUserData, createUser, deleteUser, updateUser} from '../assets/api_user.jsx';
 import UserCardsList from "../components/UserCardList.jsx";
 import AddUserModal from "../components/AddUserModal.jsx";
 import EditUserModal from "../components/EditUserModal.jsx";
@@ -9,8 +9,9 @@ import '../components/UserAdminStyle.css';  // Import the custom CSS
 const UserManagement = () => {
     const [jwt, setJwt] = useState(localStorage.getItem('token'));
     const [users, setUsers] = useState([]);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null); // Track selected user for editing
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false); // Add User modal state
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // Update User modal state
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [newUser, setNewUser] = useState({
@@ -22,9 +23,7 @@ const UserManagement = () => {
         role: 'user',
     });
 
-    // Fetch users when component mounts or JWT changes
     useEffect(() => {
-        setJwt(localStorage.getItem('token'))
         const fetchUsers = async () => {
             if (!jwt) {
                 setError('No authentication token found');
@@ -34,9 +33,7 @@ const UserManagement = () => {
 
             try {
                 setIsLoading(true);
-                let fetchedUsers = [];
-                fetchedUsers = await getUserData(jwt);
-                console.log(fetchedUsers)
+                const fetchedUsers = await getUserData(jwt);
                 setUsers(fetchedUsers);
                 setError(null);
             } catch (err) {
@@ -49,7 +46,6 @@ const UserManagement = () => {
         fetchUsers();
     }, [jwt]);
 
-    // Handle adding a new user
     const handleAddUser = async (userData) => {
         if (!jwt) {
             setError('Authentication required');
@@ -57,16 +53,16 @@ const UserManagement = () => {
         }
 
         try {
-            const addedUser = await creatUser(jwt, userData);
+            const addedUser = await createUser(jwt, userData);
             if (addedUser) {
                 setUsers([...users, addedUser]);
                 setIsAddModalOpen(false);
-                // Reset form
                 setNewUser({
-                    image: '',
                     firstName: '',
                     lastName: '',
                     email: '',
+                    password: '',
+                    image: '',
                     role: 'user',
                 });
             }
@@ -75,19 +71,19 @@ const UserManagement = () => {
         }
     };
 
-    // Handle updating a user
-    const handleUpdateUser = async () => {
+    const handleUpdateUser = async (userData) => {
         if (!jwt || !selectedUser) {
             setError('Authentication or user selection required');
             return;
         }
 
         try {
-            const updatedUser = await updateUser(jwt, selectedUser.id, selectedUser);
+            userData.id = "0"
+            console.log(userData);
+            const updatedUser = await updateUser(jwt, selectedUser.id, userData);
             if (updatedUser) {
-                setUsers(users.map(u =>
-                    u.id === selectedUser.id ? updatedUser : u
-                ));
+                setUsers(users.map(u => u.id === selectedUser.id ? updatedUser : u));
+                setIsUpdateModalOpen(false); // Close modal after updating
                 setSelectedUser(null);
             }
         } catch (err) {
@@ -95,7 +91,6 @@ const UserManagement = () => {
         }
     };
 
-    // Handle deleting a user
     const handleDeleteUser = async (userId) => {
         if (!jwt) {
             setError('Authentication required');
@@ -112,51 +107,57 @@ const UserManagement = () => {
         }
     };
 
-    // Render loading state
+    // Ensure modals show when needed
+    const handleModalClose = () => {
+        setIsUpdateModalOpen(false);
+        setSelectedUser(null); // Close the modal and reset the selected user
+    };
+
     if (isLoading) {
-        return (
-            <div className="loading-spinner">
-                <div className="spinner"></div>
-            </div>
-        );
+        return <div className="loading-spinner"><div className="spinner"></div></div>;
     }
 
-    // Render error state
     if (error) {
-        return (
-            <div className="error-message">
-                <strong>Error: </strong>
-                <span>{error}</span>
-            </div>
-        );
+        return <div className="error-message"><strong>Error: </strong><span>{error}</span></div>;
     }
 
     return (
         <div className="user-management">
             <div className="user-management-header">
                 <h2>User Management</h2>
-                <button
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="add-user-btn"
-                >
+                <button onClick={() => setIsAddModalOpen(true)} className="add-user-btn">
                     <PlusCircle className="icon" />
                     Add User
                 </button>
             </div>
 
-            {/* User Cards */}
-            <UserCardsList setSelectedUser={setSelectedUser} users={users} />
+            {/* User Cards List */}
+            <UserCardsList
+                setSelectedUser={setSelectedUser}
+                users={users}
+                handleUpdateUser={handleUpdateUser}
+                handleDeleteUser={handleDeleteUser}
+                setIsUpdateModalOpen={setIsUpdateModalOpen} // Pass modal state to card component
+            />
 
             {/* Modals */}
-            {isAddModalOpen &&
+            {isAddModalOpen && (
                 <AddUserModal
                     onClose={() => setIsAddModalOpen(false)}
                     onSubmit={handleAddUser}
                     userData={newUser}
                     setUserData={setNewUser}
                 />
-            }
-            {selectedUser && <EditUserModal user={selectedUser} onClose={() => setSelectedUser(null)} />}
+            )}
+
+            {/* Update User Modal */}
+            {isUpdateModalOpen && selectedUser && (
+                <EditUserModal
+                    user={selectedUser}
+                    onClose={handleModalClose}
+                    onSubmit={handleUpdateUser}
+                />
+            )}
         </div>
     );
 };

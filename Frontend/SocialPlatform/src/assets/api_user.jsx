@@ -58,7 +58,7 @@ export const deleteUser = async (jwt, userId) => {
     }
 };
 
-export const creatUser = async (jwt, user) => {
+export const createUser = async (jwt, user) => {
     try {
         const response = await axios.post(`${API_BASE_URL}`, user,{
             headers: {

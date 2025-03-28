@@ -1,9 +1,18 @@
-import React, { useContext } from 'react';
-import './UserAdminStyle.css';  // Importing the custom CSS
+import React from 'react';
+import './UserAdminStyle.css';  // Importing the custom CSS for styling
 
-const UserCard = ({ user, setSelectedUser, onDelete, onEdit }) => {
+const UserCard = ({ user, setSelectedUser, handleDeleteUser, setIsUpdateModalOpen }) => {
     const userLogged = localStorage.getItem("user");
     const userRole = JSON.parse(userLogged).role; // Accessing user role from localStorage
+
+    const handleEditClick = () => {
+        setSelectedUser(user); // Set selected user for editing
+        setIsUpdateModalOpen(true); // Trigger modal open in parent component
+    };
+
+    const handleDelete = (userId) => {
+        handleDeleteUser(userId);
+    };
 
     return (
         <div className="user-card">
@@ -27,16 +36,10 @@ const UserCard = ({ user, setSelectedUser, onDelete, onEdit }) => {
             {/* Action Buttons (only for ADMIN role) */}
             {userRole === "ADMIN" && (
                 <div className="action-buttons">
-                    <button
-                        onClick={() => onEdit(user)}
-                        className="edit-button"
-                    >
+                    <button onClick={handleEditClick} className="edit-button">
                         Edit
                     </button>
-                    <button
-                        onClick={() => onDelete(user.id)}
-                        className="delete-button"
-                    >
+                    <button onClick={() => handleDelete(user.id)} className="delete-button">
                         Delete
                     </button>
                 </div>
