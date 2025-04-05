@@ -4,8 +4,9 @@ import Login from './features/Login.jsx';
 import Register from './features/Register.jsx';
 import Home from "./features/Home.jsx";
 import ResetPassword from "./features/ResetPassword.jsx";
+import ProfileManagement from "./features/ProfileManagement.jsx";
 import {UserProvider} from "./UserContext.jsx";
-import UserManagement from "./features/AdminUsers.jsx";
+//import UserManagement from "./features/AdminUsers.jsx";
 
 
 const AdminRoute = () => {
@@ -28,6 +29,7 @@ function App() {
                     <Route path="/register" element={<Register />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/user" element={<AdminRoute />} />
+                    <Route path="/profile" element={<ProfileManagement />} />
                 </Routes>
             </div>
         </Router>
