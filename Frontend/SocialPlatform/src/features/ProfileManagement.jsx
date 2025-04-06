@@ -38,6 +38,12 @@ const ProfileManagement = () => {
                 });
             })
             .catch((error) => console.error('Error loading data:', error));
+        if (!formData.password.trim()) {
+            setErrors((prevErrors) => ({
+                ...prevErrors,
+                password: 'Password cannot be empty.',
+            }));
+        }
     }, []);
 
     const handleInputChange = (e) => {
