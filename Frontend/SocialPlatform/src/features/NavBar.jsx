@@ -35,7 +35,7 @@ const Navbar = () => {
                     <Typography
                         variant="h6"
                         component={Link}
-                        to="/news-feed"
+                        to="/feed"
                         sx={{ textDecoration: 'none', color: 'inherit', fontWeight: 'bold' }}
                     >
                         Looply
