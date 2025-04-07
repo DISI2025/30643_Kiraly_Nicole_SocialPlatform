@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { getAllPosts, updatePost } from '../assets/api-feed';
+import { getAllPosts, updatePost, createPost } from '../assets/api-feed';
 
 const NewsFeed = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [newPost, setNewPost] = useState({
+        description: '',
+        image: '',
+    });
+    const [isFormVisible, setIsFormVisible] = useState(false);
+    const user = JSON.parse(localStorage.getItem('user'));
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -22,36 +28,68 @@ const NewsFeed = () => {
         fetchPosts();
     }, []);
 
+    const handleFormChange = (e) => {
+        setNewPost({
+            ...newPost,
+            [e.target.name]: e.target.value,
+        });
+    };
+
+    const handlePostSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!newPost.description && !newPost.image) {
+            setError('Please provide either a description or an image URL.');
+            return;
+        }
+
+        try {
+            const postDTO = {
+                description: newPost.description,
+                image: newPost.image,
+                date: new Date().toISOString(),
+                userId: user.id,
+                noLikes: 0,
+                visible: true,
+            };
+
+            await createPost(postDTO);
+
+            const updatedPosts = await getAllPosts();
+            const visiblePosts = updatedPosts.filter(post => post.visible);
+            setPosts(visiblePosts);
+
+            setNewPost({ description: '', image: '' });
+            setIsFormVisible(false);
+        } catch (error) {
+            console.error('Error creating post:', error);
+            setError('Failed to create post');
+        }
+    };
+
+    const toggleFormVisibility = () => {
+        setIsFormVisible(!isFormVisible);
+    };
+
     const handleLike = async (postId) => {
         try {
-            // Optimistic UI update
             setPosts(posts.map(post =>
                 post.id === postId
                     ? { ...post, noLikes: post.noLikes + 1 }
                     : post
             ));
-
-            // Get the updated post from the state
             const updatedPost = posts.find(p => p.id === postId);
-
-            // Create the DTO with all fields, updating only noLikes
             const postDTO = {
-                image: updatedPost.image, // Keep the current image
-                description: updatedPost.description, // Keep the current description
-                date: updatedPost.date, // Keep the current date
-                user: updatedPost.user, // Keep the current userId
-                noLikes: updatedPost.noLikes + 1, // Increment the noLikes field
-                visible: updatedPost.visible, // Keep the visibility as is
+                image: updatedPost.image,
+                description: updatedPost.description,
+                date: updatedPost.date,
+                user: updatedPost.user,
+                noLikes: updatedPost.noLikes + 1,
+                visible: updatedPost.visible,
             };
-
-            // Call the updatePost function to update the post in the database
             await updatePost(postId, postDTO);
-
-            console.log('Post liked successfully!');
         } catch (err) {
             console.error('Error updating like:', err);
-
-            // Rollback the optimistic update in case of failure
             setPosts(posts.map(post =>
                 post.id === postId
                     ? { ...post, noLikes: post.noLikes - 1 }
@@ -76,54 +114,84 @@ const NewsFeed = () => {
                     flex-direction: column;
                     min-height: 100vh;
                 }
-                .like-button:hover {
-                    transform: scale(1.05);
-                }
-                .like-button:active {
-                    transform: scale(1.1);
+                button:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+                    background: linear-gradient(135deg, #145067, #1b6b8f);
                 }
             `}</style>
 
             <div style={styles.newsFeedContainer}>
                 <h1 style={styles.header}>Feed</h1>
 
+                <button onClick={toggleFormVisibility} style={styles.createPostButton}>
+                    <b style={{ fontSize: '1rem'}}>+</b> Create New Post
+                </button>
+
+                {isFormVisible && (
+                    <form onSubmit={handlePostSubmit} style={styles.formContainer}>
+                        {error && <p style={styles.errorMessage}>{error}</p>} {/* Error message */}
+                        <textarea
+                            name="description"
+                            placeholder="Description"
+                            value={newPost.description}
+                            onChange={handleFormChange}
+                            onInput={(e) => {
+                                e.target.style.height = 'auto';
+                                e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
+                            }}
+                            style={styles.textarea}
+                        />
+                        <input
+                            type="text"
+                            name="image"
+                            placeholder="Enter Image URL"
+                            value={newPost.image}
+                            onChange={handleFormChange}
+                            style={styles.inputField}
+                        />
+                        <button type="submit" style={styles.submitButton}>Submit</button>
+                    </form>
+                )}
+
+
                 {posts.length === 0 ? (
                     <p style={styles.noPosts}>No posts available</p>
                 ) : (
                     posts.map(post => (
-                        <div key={post.id} style={styles.post}>
+                        <div key={post.id || `${post.description}-${Math.random()}`} style={styles.post}>
                             <div style={styles.postHeader}>
                                 <img
-                                    src={post.user.image}
-                                    alt={post.user.firstName}
+                                    src={post.user?.image}
+                                    alt={post.user?.firstName}
                                     style={styles.userImage}
                                 />
                                 <div style={styles.userInfo}>
-                                    <h3>{post.user.firstName} {post.user.lastName}</h3>
+                                    <h3>{post.user?.firstName} {post.user?.lastName}</h3>
                                     <p style={styles.description}>{post.description}</p>
                                 </div>
                             </div>
 
-                            <div style={styles.postContent}>
-                                <img
-                                    src={post.image}
-                                    alt="Post"
-                                    style={styles.postImage}
-                                />
-
-                            </div>
+                            {post.image && (
+                                <div style={styles.postContent}>
+                                    <img
+                                        src={post.image}
+                                        alt="Post"
+                                        style={styles.postImage}
+                                    />
+                                </div>
+                            )}
 
                             <div style={styles.postFooter}>
                                 <div
                                     style={styles.likes}
                                     onClick={() => handleLike(post.id)}
-                                    className="like-button"
                                 >
                                     <span style={styles.heart}>♥</span>
                                     <span>{post.noLikes}</span>
                                 </div>
                                 <span style={styles.date}>
-                                    {new Date(post.date).toLocaleString()}
+                                    {post.date ? new Date(post.date).toLocaleString() : 'Date not available'}
                                 </span>
                             </div>
                         </div>
@@ -148,18 +216,6 @@ const styles = {
     header: {
         color: '#0C2734',
         marginBottom: '30px',
-    },
-    loading: {
-        color: 'white',
-        textAlign: 'center',
-        marginTop: '50px',
-        fontSize: '1.5rem',
-    },
-    error: {
-        color: 'red',
-        textAlign: 'center',
-        marginTop: '50px',
-        fontSize: '1.5rem',
     },
     noPosts: {
         color: '#555',
@@ -206,11 +262,6 @@ const styles = {
         borderRadius: '8px',
         objectFit: 'contain',
     },
-    caption: {
-        fontSize: '0.95rem',
-        color: '#333',
-        marginTop: '10px',
-    },
     postFooter: {
         fontSize: '0.9rem',
         color: '#888',
@@ -229,6 +280,7 @@ const styles = {
         transition: 'transform 0.2s',
         userSelect: 'none',
     },
+
     heart: {
         marginRight: '5px',
         color: '#0C2734',
@@ -238,6 +290,88 @@ const styles = {
     date: {
         fontSize: '0.8rem',
     },
+    createPostButton: {
+        background: 'linear-gradient(135deg, #0C2734, #145067)',
+        color: 'white',
+        padding: '12px 24px',
+        border: 'none',
+        borderRadius: '9999px',
+        cursor: 'pointer',
+        fontSize: '1rem',
+        fontWeight: '600',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+        transition: 'all 0.3s ease',
+        marginBottom: '20px',
+        letterSpacing: '0.5px',
+        verticalAlign: 'middle',
+    },
+    formContainer: {
+        width: '100%',
+        maxWidth: '600px',
+        margin: '20px auto',
+        marginTop: '10px',
+        padding: '20px',
+        boxSizing: 'border-box',
+        backgroundColor: '#e0e0e0',
+        borderRadius: '8px',
+        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+    },
+    textarea: {
+        width: '100%',
+        maxHeight: '200px',
+        resize: 'none',
+        padding: '10px',
+        border: '1px solid #ccc',
+        borderRadius: '5px',
+        boxSizing: 'border-box',
+        fontSize: '1rem',
+        marginBottom: '15px',
+        fontFamily: 'Arial, sans-serif'
+    },
+    inputField: {
+        width: '100%',
+        padding: '10px',
+        border: '1px solid #ccc',
+        borderRadius: '5px',
+        boxSizing: 'border-box',
+        fontSize: '1rem',
+        marginBottom: '15px',
+        fontFamily: 'Arial, sans-serif'
+    },
+    submitButton: {
+        background: 'linear-gradient(135deg, #0C2734, #145067)',
+        color: 'white',
+        padding: '12px 24px',
+        border: 'none',
+        borderRadius: '9999px',
+        cursor: 'pointer',
+        fontSize: '20px',
+        fontWeight: '600',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+        marginBottom: '20px',
+        letterSpacing: '0.5px',
+        verticalAlign: 'middle',
+        display: 'block',  // Ensure it's a block-level element
+        width: '30%',     // Make it take the full width of the parent container
+        maxWidth: '300px', // Optional: limit the max width to prevent it from being too wide
+        marginLeft: 'auto',  // Center the button horizontally
+        marginRight: 'auto', // Center the button horizontally
+    },
+    errorMessage: {
+        backgroundColor: '#f1b0b7',
+        color: '#721c24',
+        padding: '10px',
+        borderRadius: '5px',
+        border: '1px solid #f5c6cb',
+        fontSize: '1rem',
+        marginBottom: '15px',
+        textAlign: 'center',  // Center align the error message text
+        fontWeight: 'bold',    // Make the text bold
+    },
+
+
+
+
 };
 
 export default NewsFeed;
