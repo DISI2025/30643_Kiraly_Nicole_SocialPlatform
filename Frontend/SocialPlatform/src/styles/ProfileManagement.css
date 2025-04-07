@@ -1,0 +1,215 @@
+.error {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* Asigură-te că întregul document ocupă întreaga înălțime */
+    overflow: hidden; /* Împiedică scroll-ul pe pagină */
+}
+.profile-management {
+    display: flex;
+    gap: 150px;
+    padding: 80px;
+    width: 100vw;
+    background: #f8f9fa;
+    min-height: 100vh;
+    box-sizing: border-box; /* Adaugă padding-ul în calculele pentru dimensiuni */
+    overflow: hidden;
+}
+
+.edit-container {
+    width: 55%;
+    height: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    margin-top: 100px; /* Space for header elevation */
+}
+
+.edit-header {
+    background: #0c2734;
+    padding: 25px 40px;
+    border-radius: 8px 8px 8px 8px;
+    position: absolute;
+    top: -20px; /* Lift header up */
+    left: 20px;
+    right: 20px;
+    box-shadow: 0 4px 15px rgba(12, 39, 52, 0.2);
+    z-index: 2;
+}
+
+
+.edit-header h2 {
+    color: white;
+    margin: 0;
+    font-size: 1.6rem;
+    position: relative;
+}
+
+.edit-form {
+    padding: 80px 40px 40px;
+    padding-bottom: 100px;
+    position: relative;
+    height: auto;
+}
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input {
+    width: 80%; /* Lățimea mai mică */
+    padding: 8px;
+    border: 1px solid #0c2734; /* Culoare bordură câmpuri */
+    border-radius: 6px;
+    font-size: 1rem;
+    border-color: #0c2734; /* Culoare bordură câmpuri */
+    background-color: #0c2734; /* Fundal câmpuri */
+    color: white; /* Text alb */
+}
+
+.button-group {
+    position: absolute;
+    bottom: 15px;
+    left: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+button {
+    background: #0c2734;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.btn-update {
+    background-color: #0c2734;
+    color: white;
+}
+.edit-container .button-group {
+    position: absolute;
+    bottom: 15px;
+    left: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Spațiere între butoane */
+}
+
+.edit-container .button-group button {
+    background: #0c2734; /* Culoare buton */
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.edit-container .button-group button:hover {
+    opacity: 0.9;
+}
+
+.profile-sidebar {
+    width: 30%;
+    height: 50%;
+    background: white;
+    border-radius: 8px;
+
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: visible;
+    margin-top: 100px;
+}
+
+.profile-card {
+    height: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    position: relative;
+}
+
+
+.profile-image {
+    position: absolute;
+    top: -85px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: #0c2734; /* Blue outer frame */
+    padding: 6px; /* Controls blue frame thickness */
+    box-shadow: 0 4px 15px rgba(12, 39, 52, 0.3);
+    z-index: 2;
+}
+
+.profile-image::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    background: white; /* White inner frame */
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.profile-image img {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.profile-card h3 {
+    margin-top: 110px; /* Increased space for the image */
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    color: #333;
+}
+
+.contact-info p,
+.contact-info h4 {
+    background-color: #f8f9fa;
+    color: #666;
+    margin: 0; /* Elimină orice margini pentru a face elementele să se lipească */
+    padding: 10px; /* Adaugă padding pentru un aspect uniform */
+    font-size: 1rem; /* Dimensiune uniformă pentru ambele */
+}
+
+.contact-info p {
+    border-radius: 0 0 8px 8px; /* Colțuri rotunjite doar sus */
+}
+
+.contact-info h4 {
+    border-radius: 8px 8px 0 0; /* Colțuri rotunjite doar jos */
+}
+
