@@ -44,7 +44,7 @@ const Navbar = () => {
 
                 {user && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Link to="/userProfile" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+                        <Link to="/profile" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
                             <Avatar
                                 src={user.image || '/default-avatar.png'}
                                 alt={user.firstName}
