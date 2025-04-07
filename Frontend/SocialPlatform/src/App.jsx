@@ -5,7 +5,9 @@ import Register from './features/Register.jsx';
 import Home from "./features/Home.jsx";
 import ResetPassword from "./features/ResetPassword.jsx";
 import {UserProvider} from "./UserContext.jsx";
-import UserManagement from "./features/AdminUsers.jsx";
+import NewsFeed from "./features/NewsFeed.jsx";
+import UserProfile from "./features/UserProfile.jsx";
+// import UserManagement from "./features/AdminUsers.jsx";
 
 
 const AdminRoute = () => {
@@ -28,6 +30,8 @@ function App() {
                     <Route path="/register" element={<Register />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/user" element={<AdminRoute />} />
+                    <Route path="/feed" element={<NewsFeed />} />
+                    <Route path="/userProfile" element={<UserProfile />} />
                 </Routes>
             </div>
         </Router>
