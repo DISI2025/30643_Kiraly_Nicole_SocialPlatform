@@ -23,7 +23,7 @@ const Login = () => {
             const user = await getUserData(jwt);
             localStorage.setItem('user', JSON.stringify(user));
             login(user, jwt);
-            navigate('/feed');
+            navigate('/news-feed');
         } catch (err) {
             setError(err.message);
         }
