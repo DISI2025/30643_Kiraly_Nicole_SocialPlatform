@@ -47,14 +47,13 @@ public class UserService {
                 });
     }
 
-    //@Cacheable(value = "users", key = "#id.toString()")
+    @Cacheable(value = "users", key = "#id.toString()")
     public UserDTO getUserById(UUID id) {
         Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isEmpty()) {
             LOGGER.error("User with id {} not found", id);
             throw new RuntimeException("User with id " + id + " not found");
         }
-        LOGGER.debug("Retrieved user: {}", userOptional);
         return UserBuilder.toUserDTO(userOptional.get());
 
     }
