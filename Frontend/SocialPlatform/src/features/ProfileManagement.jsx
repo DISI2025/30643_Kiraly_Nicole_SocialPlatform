@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import { updateUser, deleteUser, findUserById } from '../assets/api-profile';
 import { UserContext } from '../UserContext';
 import  '../styles/ProfileManagement.css'
-
+import Navbar from './NavBar.jsx';
 const ProfileManagement = () => {
     const {logout} = useContext(UserContext);
     const [user, setUser] = useState(null);
@@ -154,6 +154,9 @@ const handleUpdate =  async (e) => {
     }
 
     return (
+        <>
+        {user && <Navbar />}
+
         <div className="profile-management">
             <div className="edit-container">
                 <div className="edit-header">
@@ -245,6 +248,7 @@ const handleUpdate =  async (e) => {
 
 
         </div>
+            </>
     );
 };
 
