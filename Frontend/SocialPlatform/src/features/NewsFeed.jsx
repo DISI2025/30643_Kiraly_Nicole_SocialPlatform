@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { getAllPosts, updatePost, createPost } from '../assets/api-feed';
 import '../styles/NewsFeed.css'; // Imported the stylesheet
+import Navbar from './NavBar.jsx';
+import { UserContext } from '../UserContext';
+import { Toolbar } from '@mui/material';
 
 const NewsFeed = () => {
     const [posts, setPosts] = useState([]);
@@ -101,6 +104,7 @@ const NewsFeed = () => {
 
     return (
         <>
+        {user && <Navbar />}
             <div className="newsFeedContainer">
                 <h1 className="header">Feed</h1>
 

@@ -5,6 +5,7 @@ import Register from './features/Register.jsx';
 import Home from "./features/Home.jsx";
 import ResetPassword from "./features/ResetPassword.jsx";
 import NewsFeed from "./features/NewsFeed.jsx";
+import ProfileManagement from "./features/ProfileManagement.jsx";
 import {UserProvider} from "./UserContext.jsx";
 //import UserManagement from "./features/AdminUsers.jsx";
 
@@ -30,6 +31,7 @@ function App() {
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/user" element={<AdminRoute />} />
                     <Route path="/news-feed" element={<NewsFeed />} />
+                    <Route path="/profile" element={<ProfileManagement />} />
                 </Routes>
             </div>
         </Router>
