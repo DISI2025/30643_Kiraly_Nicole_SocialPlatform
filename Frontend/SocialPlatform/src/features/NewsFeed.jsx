@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getAllPosts, updatePost, createPost } from '../assets/api-feed';
+import '../styles/NewsFeed.css'; // Imported the stylesheet
 
 const NewsFeed = () => {
     const [posts, setPosts] = useState([]);
@@ -100,37 +101,16 @@ const NewsFeed = () => {
 
     return (
         <>
-            <style>{`
-                html, body {
-                    margin: 0;
-                    padding: 0;
-                    min-height: 100vh;
-                    background-color: #0C2734;
-                    display: flex;
-                    flex-direction: column;
-                }
-                #root {
-                    display: flex;
-                    flex-direction: column;
-                    min-height: 100vh;
-                }
-                button:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-                    background: linear-gradient(135deg, #145067, #1b6b8f);
-                }
-            `}</style>
+            <div className="newsFeedContainer">
+                <h1 className="header">Feed</h1>
 
-            <div style={styles.newsFeedContainer}>
-                <h1 style={styles.header}>Feed</h1>
-
-                <button onClick={toggleFormVisibility} style={styles.createPostButton}>
-                    <b style={{ fontSize: '1rem'}}>+</b> Create New Post
+                <button onClick={toggleFormVisibility} className="createPostButton">
+                    <b style={{ fontSize: '1rem' }}>+</b> Create New Post
                 </button>
 
                 {isFormVisible && (
-                    <form onSubmit={handlePostSubmit} style={styles.formContainer}>
-                        {error && <p style={styles.errorMessage}>{error}</p>} {/* Error message */}
+                    <form onSubmit={handlePostSubmit} className="formContainer">
+                        {error && <p className="errorMessage">{error}</p>}
                         <textarea
                             name="description"
                             placeholder="Description"
@@ -140,7 +120,7 @@ const NewsFeed = () => {
                                 e.target.style.height = 'auto';
                                 e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
                             }}
-                            style={styles.textarea}
+                            className="textarea"
                         />
                         <input
                             type="text"
@@ -148,49 +128,53 @@ const NewsFeed = () => {
                             placeholder="Enter Image URL"
                             value={newPost.image}
                             onChange={handleFormChange}
-                            style={styles.inputField}
+                            className="inputField"
                         />
-                        <button type="submit" style={styles.submitButton}>Submit</button>
+                        <button type="submit" className="submitButton">Submit</button>
                     </form>
                 )}
 
-
                 {posts.length === 0 ? (
-                    <p style={styles.noPosts}>No posts available</p>
+                    <p className="noPosts">No posts available</p>
                 ) : (
                     posts.map(post => (
-                        <div key={post.id || `${post.description}-${Math.random()}`} style={styles.post}>
-                            <div style={styles.postHeader}>
-                                <img
-                                    src={post.user?.image}
-                                    alt={post.user?.firstName}
-                                    style={styles.userImage}
-                                />
-                                <div style={styles.userInfo}>
-                                    <h3>{post.user?.firstName} {post.user?.lastName}</h3>
-                                    <p style={styles.description}>{post.description}</p>
+                        <div key={post.id || `${post.description}-${Math.random()}`} className="post">
+                            <div className="postHeader">
+                                <div className="userInfo">
+                                    <h1 className="userNameWrapper">
+                                        <img
+                                            src={post.user?.image}
+                                            alt={post.user?.firstName}
+                                            className="userImage"
+                                        />
+                                        <span className="userName">
+                                            {post.user?.firstName} {post.user?.lastName}
+                                        </span>
+                                    </h1>
+                                    <p className="description">{post.description}</p>
                                 </div>
                             </div>
 
+
                             {post.image && (
-                                <div style={styles.postContent}>
+                                <div className="postContent">
                                     <img
                                         src={post.image}
                                         alt="Post"
-                                        style={styles.postImage}
+                                        className="postImage"
                                     />
                                 </div>
                             )}
 
-                            <div style={styles.postFooter}>
+                            <div className="postFooter">
                                 <div
-                                    style={styles.likes}
+                                    className="likes"
                                     onClick={() => handleLike(post.id)}
                                 >
-                                    <span style={styles.heart}>♥</span>
+                                    <span className="heart">♥</span>
                                     <span>{post.noLikes}</span>
                                 </div>
-                                <span style={styles.date}>
+                                <span className="date">
                                     {post.date ? new Date(post.date).toLocaleString() : 'Date not available'}
                                 </span>
                             </div>
@@ -200,178 +184,6 @@ const NewsFeed = () => {
             </div>
         </>
     );
-};
-
-const styles = {
-    newsFeedContainer: {
-        width: '60vw',
-        padding: '20px',
-        backgroundColor: '#e0e0e0',
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        margin: '0 auto',
-    },
-    header: {
-        color: '#0C2734',
-        marginBottom: '30px',
-    },
-    noPosts: {
-        color: '#555',
-        fontSize: '1.2rem',
-    },
-    post: {
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        marginBottom: '20px',
-        padding: '15px',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-        width: '100%',
-        maxWidth: '800px',
-    },
-    postHeader: {
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '10px',
-    },
-    userImage: {
-        width: '40px',
-        height: '40px',
-        borderRadius: '50%',
-        marginRight: '10px',
-    },
-    userInfo: {
-        paddingLeft: '10px',
-        color: 'black',
-    },
-    description: {
-        fontSize: '0.9rem',
-        color: '#555',
-    },
-    postContent: {
-        marginBottom: '10px',
-    },
-    postImage: {
-        display: 'block',
-        maxWidth: '100%',
-        maxHeight: '500px',
-        width: 'auto',
-        height: 'auto',
-        margin: '0 auto 10px',
-        borderRadius: '8px',
-        objectFit: 'contain',
-    },
-    postFooter: {
-        fontSize: '0.9rem',
-        color: '#888',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingTop: '10px',
-        borderTop: '1px solid #eee',
-    },
-    likes: {
-        display: 'flex',
-        alignItems: 'center',
-        fontSize: '1rem',
-        color: '#0C2734',
-        cursor: 'pointer',
-        transition: 'transform 0.2s',
-        userSelect: 'none',
-    },
-
-    heart: {
-        marginRight: '5px',
-        color: '#0C2734',
-        fontSize: '1.5rem',
-        transition: 'transform 0.2s',
-    },
-    date: {
-        fontSize: '0.8rem',
-    },
-    createPostButton: {
-        background: 'linear-gradient(135deg, #0C2734, #145067)',
-        color: 'white',
-        padding: '12px 24px',
-        border: 'none',
-        borderRadius: '9999px',
-        cursor: 'pointer',
-        fontSize: '1rem',
-        fontWeight: '600',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-        transition: 'all 0.3s ease',
-        marginBottom: '20px',
-        letterSpacing: '0.5px',
-        verticalAlign: 'middle',
-    },
-    formContainer: {
-        width: '100%',
-        maxWidth: '600px',
-        margin: '20px auto',
-        marginTop: '10px',
-        padding: '20px',
-        boxSizing: 'border-box',
-        backgroundColor: '#e0e0e0',
-        borderRadius: '8px',
-        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-    },
-    textarea: {
-        width: '100%',
-        maxHeight: '200px',
-        resize: 'none',
-        padding: '10px',
-        border: '1px solid #ccc',
-        borderRadius: '5px',
-        boxSizing: 'border-box',
-        fontSize: '1rem',
-        marginBottom: '15px',
-        fontFamily: 'Arial, sans-serif'
-    },
-    inputField: {
-        width: '100%',
-        padding: '10px',
-        border: '1px solid #ccc',
-        borderRadius: '5px',
-        boxSizing: 'border-box',
-        fontSize: '1rem',
-        marginBottom: '15px',
-        fontFamily: 'Arial, sans-serif'
-    },
-    submitButton: {
-        background: 'linear-gradient(135deg, #0C2734, #145067)',
-        color: 'white',
-        padding: '12px 24px',
-        border: 'none',
-        borderRadius: '9999px',
-        cursor: 'pointer',
-        fontSize: '20px',
-        fontWeight: '600',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-        marginBottom: '20px',
-        letterSpacing: '0.5px',
-        verticalAlign: 'middle',
-        display: 'block',  // Ensure it's a block-level element
-        width: '30%',     // Make it take the full width of the parent container
-        maxWidth: '300px', // Optional: limit the max width to prevent it from being too wide
-        marginLeft: 'auto',  // Center the button horizontally
-        marginRight: 'auto', // Center the button horizontally
-    },
-    errorMessage: {
-        backgroundColor: '#f1b0b7',
-        color: '#721c24',
-        padding: '10px',
-        borderRadius: '5px',
-        border: '1px solid #f5c6cb',
-        fontSize: '1rem',
-        marginBottom: '15px',
-        textAlign: 'center',  // Center align the error message text
-        fontWeight: 'bold',    // Make the text bold
-    },
-
-
-
-
 };
 
 export default NewsFeed;
