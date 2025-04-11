@@ -52,3 +52,31 @@ export const findUserById = async (userId) => {
         throw new Error(error.response?.data?.message || 'Failed to find user by ID');
     }
 };
+
+export const createUser = async (jwt, user) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}`, user,{
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+            },
+        });
+        return response.data;
+
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to insert user data');
+    }
+};
+
+export const getUserData = async (jwt) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}`, {
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+            },
+        });
+        return response.data;
+
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to fetch user data');
+    }
+};

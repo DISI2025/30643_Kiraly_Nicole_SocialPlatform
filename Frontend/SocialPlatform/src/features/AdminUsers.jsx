@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { PlusCircle } from 'lucide-react';
-import {getUserData, createUser, deleteUser, updateUser} from '../assets/api_user.jsx';
+import React, {useEffect, useState} from 'react';
+import {PlusCircle} from 'lucide-react';
+import {createUser, deleteUser, getUserData, updateUser} from '../assets/api-profile.jsx';
 import UserCardsList from "../components/UserCardList.jsx";
 import AddUserModal from "../components/AddUserModal.jsx";
 import EditUserModal from "../components/EditUserModal.jsx";
-import '../components/UserAdminStyle.css';  // Import the custom CSS
+import '../components/UserAdminStyle.css';
+import Navbar from "./NavBar.jsx"; // Import the custom CSS
 
 const UserManagement = () => {
     const [jwt, setJwt] = useState(localStorage.getItem('token'));
@@ -78,9 +79,9 @@ const UserManagement = () => {
         }
 
         try {
-            userData.id = "0"
+            userData.id = selectedUser.id;
             console.log(userData);
-            const updatedUser = await updateUser(jwt, selectedUser.id, userData);
+            const updatedUser = await updateUser(selectedUser.id, userData);
             if (updatedUser) {
                 setUsers(users.map(u => u.id === selectedUser.id ? updatedUser : u));
                 setIsUpdateModalOpen(false); // Close modal after updating
@@ -98,7 +99,7 @@ const UserManagement = () => {
         }
 
         try {
-            const isDeleted = await deleteUser(jwt, userId);
+            const isDeleted = await deleteUser(userId);
             if (isDeleted) {
                 setUsers(users.filter(u => u.id !== userId));
             }
@@ -114,7 +115,9 @@ const UserManagement = () => {
     };
 
     if (isLoading) {
-        return <div className="loading-spinner"><div className="spinner"></div></div>;
+        return <div className="loading-spinner">
+            <div className="spinner"></div>
+        </div>;
     }
 
     if (error) {
@@ -122,43 +125,46 @@ const UserManagement = () => {
     }
 
     return (
-        <div className="user-management">
-            <div className="user-management-header">
-                <h2>User Management</h2>
-                <button onClick={() => setIsAddModalOpen(true)} className="add-user-btn">
-                    <PlusCircle className="icon" />
-                    Add User
-                </button>
+        <>
+            <Navbar/>
+            <div className="user-management">
+                <div className="user-management-header">
+                    <h2>User Management</h2>
+                    <button onClick={() => setIsAddModalOpen(true)} className="add-user-btn">
+                        <PlusCircle className="icon"/>
+                        Add User
+                    </button>
+                </div>
+
+                {/* User Cards List */}
+                <UserCardsList
+                    setSelectedUser={setSelectedUser}
+                    users={users}
+                    handleUpdateUser={handleUpdateUser}
+                    handleDeleteUser={handleDeleteUser}
+                    setIsUpdateModalOpen={setIsUpdateModalOpen} // Pass modal state to card component
+                />
+
+                {/* Modals */}
+                {isAddModalOpen && (
+                    <AddUserModal
+                        onClose={() => setIsAddModalOpen(false)}
+                        onSubmit={handleAddUser}
+                        userData={newUser}
+                        setUserData={setNewUser}
+                    />
+                )}
+
+                {/* Update User Modal */}
+                {isUpdateModalOpen && selectedUser && (
+                    <EditUserModal
+                        user={selectedUser}
+                        onClose={handleModalClose}
+                        onSubmit={handleUpdateUser}
+                    />
+                )}
             </div>
-
-            {/* User Cards List */}
-            <UserCardsList
-                setSelectedUser={setSelectedUser}
-                users={users}
-                handleUpdateUser={handleUpdateUser}
-                handleDeleteUser={handleDeleteUser}
-                setIsUpdateModalOpen={setIsUpdateModalOpen} // Pass modal state to card component
-            />
-
-            {/* Modals */}
-            {isAddModalOpen && (
-                <AddUserModal
-                    onClose={() => setIsAddModalOpen(false)}
-                    onSubmit={handleAddUser}
-                    userData={newUser}
-                    setUserData={setNewUser}
-                />
-            )}
-
-            {/* Update User Modal */}
-            {isUpdateModalOpen && selectedUser && (
-                <EditUserModal
-                    user={selectedUser}
-                    onClose={handleModalClose}
-                    onSubmit={handleUpdateUser}
-                />
-            )}
-        </div>
+        </>
     );
 };
 

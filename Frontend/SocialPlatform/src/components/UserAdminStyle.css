@@ -1,10 +1,12 @@
 /* ========== GENERAL STYLES ========== */
 body {
-    background: linear-gradient(to right, #f8f6f2, #fdfdfd);
+    /*background: linear-gradient(to right, #f8f6f2, #fdfdfd);*/
     color: #333;
     font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 0;
+    background-image: url("https://static.vecteezy.com/system/resources/previews/040/150/343/non_2x/abstract-grey-connecting-dots-and-lines-connection-science-on-white-with-blank-space-design-technology-background-vector.jpg");
+
 }
 
 /* ========== CONTAINER ========== */

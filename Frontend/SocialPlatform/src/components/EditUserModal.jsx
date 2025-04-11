@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import styles from "./UserAdminStyle.css";  // Import your styles
+// import styles from "./UserAdminStyle.css";  // Import your styles
 
 const EditUserModal = ({ user, onClose, onSubmit }) => {
     const [editedUser, setEditedUser] = useState(user); // Local state to hold changes
