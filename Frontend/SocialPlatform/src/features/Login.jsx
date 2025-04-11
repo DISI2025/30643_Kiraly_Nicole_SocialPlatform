@@ -11,6 +11,8 @@ const Login = () => {
     const navigate = useNavigate();
     const {login} = useContext(UserContext);
 
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -21,7 +23,7 @@ const Login = () => {
             const user = await getUserData(jwt);
             localStorage.setItem('user', JSON.stringify(user));
             login(user, jwt);
-            navigate('/');
+            navigate('/news-feed');
         } catch (err) {
             setError(err.message);
         }
