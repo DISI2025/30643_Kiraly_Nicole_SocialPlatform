@@ -6,11 +6,12 @@
 html, body {
     margin: 0;
     padding: 0;
-    height: 100%; /* Asigură-te că întregul document ocupă întreaga înălțime */
-    overflow: hidden; /* Împiedică scroll-ul pe pagină */
+    height: 100%;
+    overflow-x: hidden;
+    scrollbar-width: none;
 }
 .profile-management {
-    margin-top: 80px;
+    margin-top: 0px;
     display: flex;
     gap: 150px;
     padding: 80px;
@@ -18,7 +19,7 @@ html, body {
     background: #f8f9fa;
     min-height: 100vh;
     box-sizing: border-box; /* Adaugă padding-ul în calculele pentru dimensiuni */
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 .edit-container {
