@@ -45,8 +45,8 @@ public class PostController {
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<PostDTO> updatePost(@PathVariable("id") UUID postId, @RequestBody PostDTO postDTO) {
-        UUID post = postService.update(postId, postDTO);
-        return new ResponseEntity<>(postDTO, HttpStatus.OK);
+        PostDTO post = postService.update(postId, postDTO);
+        return new ResponseEntity<>(post, HttpStatus.OK);
     }
 
     @Transactional

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-    public static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
 
     @Autowired
@@ -31,14 +32,16 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-//    @Cacheable(value = "users", key = "'usersList'")
+    @Cacheable(value = "users", key = "'allUsers'")
     public List<UserDTO> getAllUsers() {
+        LOGGER.info("Fetching all users from database");
         List<User> users = userRepository.findAll();
-        return users.stream().map(UserBuilder::toUserDTO).toList();
+        return users.stream().map(UserBuilder::toUserDTO).collect(Collectors.toList());
     }
 
-    @Cacheable(value = "users", key = "#email")
+    @Cacheable(value = "users", key = "#email", unless = "#result == null")
     public UserDTO findByEmail(String email) {
+        LOGGER.info("Fetching user by email: {}", email);
         Optional<User> userOptional = userRepository.findByEmail(email);
         return userOptional.map(UserBuilder::toUserDTO)
                 .orElseThrow(() -> {
@@ -47,19 +50,19 @@ public class UserService {
                 });
     }
 
-    //@Cacheable(value = "users", key = "#id.toString()")
+    @Cacheable(value = "users", key = "#id.toString()", unless = "#result == null")
     public UserDTO getUserById(UUID id) {
+        LOGGER.info("Fetching user by id: {}", id);
         Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isEmpty()) {
             LOGGER.error("User with id {} not found", id);
             throw new RuntimeException("User with id " + id + " not found");
         }
         return UserBuilder.toUserDTO(userOptional.get());
-
     }
 
     @Transactional
-    @CacheEvict(value = "users", key = "'usersList'")
+    @CacheEvict(value = "users", key = "'allUsers'")
     public UUID insert(UserDTO userDTO) {
         User user = UserBuilder.toUser(userDTO);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
@@ -68,10 +71,17 @@ public class UserService {
         return user.getId();
     }
 
-    @CachePut(value = "users", key = "#id.toString()")
-    @CacheEvict(value = "users", key = "'users'")
     @Transactional
-    public UUID update(UUID id, UserDTO userDTO) {
+    @Caching(
+        put = {
+            @CachePut(value = "users", key = "#id.toString()")
+        },
+        evict = {
+            @CacheEvict(value = "users", key = "'allUsers'"),
+            @CacheEvict(value = "users", key = "#result.email", condition = "#result != null")
+        }
+    )
+    public UserDTO update(UUID id, UserDTO userDTO) {
         Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isEmpty()) {
             LOGGER.error("User with id {} not found", id);
@@ -81,17 +91,31 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setId(id);
         user = userRepository.save(user);
-        return user.getId();
+        return UserBuilder.toUserDTO(user);
     }
 
-    @CacheEvict(value = "users", allEntries = true)
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "users", key = "#id.toString()"),
+        @CacheEvict(value = "users", key = "'allUsers'")
+    })
     public void delete(UUID id) {
         Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isEmpty()) {
             LOGGER.error("User with id {} not found", id);
             throw new RuntimeException("User with id " + id + " not found");
         }
+        // Cache by email also needs to be evicted
+        String email = userOptional.get().getEmail();
+        if (email != null) {
+            evictUserByEmail(email);
+        }
         userRepository.delete(userOptional.get());
+    }
+
+    @CacheEvict(value = "users", key = "#email")
+    public void evictUserByEmail(String email) {
+        // This method is just for cache eviction
+        LOGGER.debug("Evicting user with email {} from cache", email);
     }
 }
