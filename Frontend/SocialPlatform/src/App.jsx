@@ -7,8 +7,7 @@ import ResetPassword from "./features/ResetPassword.jsx";
 import NewsFeed from "./features/NewsFeed.jsx";
 import ProfileManagement from "./features/ProfileManagement.jsx";
 import {UserProvider} from "./UserContext.jsx";
-//import UserManagement from "./features/AdminUsers.jsx";
-
+import UserManagement from "./features/AdminUsers.jsx";
 
 const AdminRoute = () => {
     const storedUser = localStorage.getItem("user"); // Get user role from session storage
