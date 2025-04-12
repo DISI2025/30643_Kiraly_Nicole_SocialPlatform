@@ -49,6 +49,12 @@ public class PostController {
         return new ResponseEntity<>(postDTO, HttpStatus.OK);
     }
 
+    @PutMapping(value = "/block-post/{id}")
+    public ResponseEntity<PostDTO> blockPost(@PathVariable("id") UUID postId) {
+        PostDTO postDTO = postService.blockPost(postId);
+        return new ResponseEntity<>(postDTO, HttpStatus.OK);
+    }
+
     @Transactional
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<UUID> deletePost(@PathVariable("id") UUID postId) {

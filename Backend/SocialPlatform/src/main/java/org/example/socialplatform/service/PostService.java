@@ -94,4 +94,18 @@ public class PostService {
         }
         postRepository.delete(postOptional.get());
     }
+
+    @CachePut(value = "posts", key = "#id.toString()")
+    @CacheEvict(value = "posts", key = "'postsList'")
+    @Transactional
+    public PostDTO blockPost(UUID id) {
+        Optional<Post> postOptional = postRepository.findById(id);
+        if(postOptional.isEmpty()) {
+            LOGGER.error("Post with id {} not found", id);
+            throw new RuntimeException("Post with id " + id + " not found");
+        }
+        postOptional.get().setVisible(false);
+        Post post = postRepository.save(postOptional.get());
+        return PostBuilder.toPostDTO(post);
+    }
 }
