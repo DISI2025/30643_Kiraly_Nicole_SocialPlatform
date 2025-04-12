@@ -47,7 +47,7 @@ public class UserService {
                 });
     }
 
-    @Cacheable(value = "users", key = "#id.toString()")
+    //@Cacheable(value = "users", key = "#id.toString()")
     public UserDTO getUserById(UUID id) {
         Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isEmpty()) {
