@@ -141,4 +141,19 @@ public class PostService {
         // This method is just for cache eviction
         LOGGER.debug("Evicting posts for user with ID {} from cache", user);
     }
+
+    @CachePut(value = "posts", key = "#id.toString()")
+    @CacheEvict(value = "posts", key = "'postsList'")
+    @Transactional
+    public PostDTO blockPost(UUID id) {
+        Optional<Post> postOptional = postRepository.findById(id);
+        if(postOptional.isEmpty()) {
+            LOGGER.error("Post with id {} not found", id);
+            throw new RuntimeException("Post with id " + id + " not found");
+        }
+        postOptional.get().setVisible(false);
+        Post post = postRepository.save(postOptional.get());
+        return PostBuilder.toPostDTO(post);
+    }
 }
+
