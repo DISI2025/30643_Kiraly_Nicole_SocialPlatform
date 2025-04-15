@@ -1,15 +1,76 @@
-import React, { useContext } from 'react';
-import { AppBar, Toolbar, Typography, Button, Avatar, Box } from '@mui/material';
+import React, { useContext, useEffect, useState } from 'react';
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    Button,
+    Avatar,
+    Box,
+    TextField,
+    MenuItem,
+    Menu,
+    InputAdornment,
+    Divider
+} from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '../UserContext';
+import { getUserData } from '../assets/api-profile.jsx';
+import { SearchIcon } from "lucide-react";
 
 const Navbar = () => {
     const { user, logout } = useContext(UserContext);
     const navigate = useNavigate();
 
+    const [searchQuery, setSearchQuery] = useState('');
+    const [allUsers, setAllUsers] = useState([]);
+    const [searchResults, setSearchResults] = useState([]);
+    const [anchorEl, setAnchorEl] = useState(null);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const users = await getUserData(token);
+                console.log("All users from API:", users);
+                setAllUsers(users || []);
+            } catch (error) {
+                console.error('Failed to fetch users:', error.message);
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
     const handleLogout = () => {
         logout();
         navigate('/');
+    };
+
+    const handleSearchChange = (event) => {
+        const query = event.target.value;
+        setSearchQuery(query);
+
+        if (query.length > 0) {
+            const filtered = allUsers.filter(u =>
+                `${u.firstName} ${u.lastName}`.toLowerCase().startsWith(query.toLowerCase())
+            );
+            setSearchResults(filtered);
+            setAnchorEl(event.currentTarget);
+        } else {
+            setSearchResults([]);
+            setAnchorEl(null);
+        }
+    };
+
+    const handleResultClick = (userId) => {
+        navigate(`/profile/${userId}`);
+        setSearchQuery('');
+        setSearchResults([]);
+        setAnchorEl(null);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
     };
 
     return (
@@ -40,7 +101,65 @@ const Navbar = () => {
                     >
                         Looply
                     </Typography>
+
+                    {user && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', mx: 2, paddingLeft: 10 }}>
+                            <TextField
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                variant="outlined"
+                                size="small"
+                                placeholder="Search users..."
+                                fullWidth
+                                sx={{
+                                    width: 500,
+                                    backgroundColor: 'white',
+                                    borderRadius: 1,
+                                }}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon sx={{ color: '#0c2734' }} />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                            <Menu
+                                anchorEl={anchorEl}
+                                open={Boolean(anchorEl) && searchResults.length > 0}
+                                onClose={handleMenuClose}
+                                sx={{ mt: 1, maxHeight: 300, overflowY: 'auto' }}
+                            >
+                                {searchResults.map((u) => (
+                                    <Box key={u.id}>
+                                        <MenuItem
+                                            onClick={() => handleResultClick(u.id)}
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 2,
+                                                padding: '10px 15px',
+                                                '&:hover': {
+                                                    backgroundColor: '#f0f0f0',
+                                                    cursor: 'pointer',
+                                                }
+                                            }}
+                                        >
+                                            <Avatar src={u.image || '/default-avatar.png'} sx={{ width: 40, height: 40 }} />
+                                            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                                <Typography variant="body1">{u.firstName} {u.lastName}</Typography>
+                                                <Typography variant="body2" color="textSecondary">{u.email}</Typography>
+                                            </Box>
+                                        </MenuItem>
+                                        <Divider sx={{ my: 1 }} />
+                                    </Box>
+                                ))}
+                            </Menu>
+                        </Box>
+                    )}
                 </Box>
+
+
 
                 {user && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
