@@ -41,6 +41,17 @@ export const getPostById = async (postId) => {
     }
 };
 
+// Get all posts by user ID
+export const getPostsByUserId = async (userId) => {
+    try {
+        const allPosts = await getAllPosts();
+        const userPosts = allPosts.filter(post => post.user?.id === userId);
+        return userPosts;
+    } catch (error) {
+        throw new Error(error.message || 'Failed to fetch user posts');
+    }
+};
+
 // Update post
 export const updatePost = async (postId, postDTO) => {
     try {

@@ -59,11 +59,19 @@ const Navbar = () => {
         } else {
             setSearchResults([]);
             setAnchorEl(null);
+
+
         }
     };
 
     const handleResultClick = (userId) => {
-        navigate(`/profile/${userId}`);
+        if (user.id === userId) {
+            // Dacă user.id este egal cu userId, navighează pe profilul utilizatorului logat
+            navigate('/profile');
+        } else {
+            // Dacă nu, navighează la profilul altui utilizator
+            navigate(`/another-profile?user=${userId}`);
+        }
         setSearchQuery('');
         setSearchResults([]);
         setAnchorEl(null);
