@@ -26,7 +26,8 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<List<PostDTO>> getAllPosts() {
-        List<PostDTO> posts = postService.getAllPosts();
+        //List<PostDTO> posts = postService.getAllPosts();
+        List<PostDTO> posts = postService.getAllPostsOrderedByDate();
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
@@ -46,6 +47,8 @@ public class PostController {
     @PutMapping(value = "/{id}")
     public ResponseEntity<PostDTO> updatePost(@PathVariable("id") UUID postId, @RequestBody PostDTO postDTO) {
         PostDTO post = postService.update(postId, postDTO);
+        System.out.println(post.getNoLikes());
+        System.out.println(post.getDescription());
         return new ResponseEntity<>(post, HttpStatus.OK);
     }
 

@@ -32,11 +32,11 @@ public class PostService {
     }
 
     @Cacheable(value = "posts", key = "'allPosts'")
-    public List<PostDTO> getAllPosts() {
-        LOGGER.info("Fetching all posts from database");
-        List<Post> posts = postRepository.findAll();
+    public List<PostDTO> getAllPostsOrderedByDate() {
+        List<Post> posts = postRepository.findAllByOrderByDateDesc();
         return posts.stream().map(PostBuilder::toPostDTO).collect(Collectors.toList());
     }
+
 
     @Cacheable(value = "posts", key = "'userPosts:' + #user")
     public List<PostDTO> getPostsByUserId(UUID user) {
