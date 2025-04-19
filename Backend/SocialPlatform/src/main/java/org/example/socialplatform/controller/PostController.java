@@ -26,7 +26,6 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<List<PostDTO>> getAllPosts() {
-        //List<PostDTO> posts = postService.getAllPosts();
         List<PostDTO> posts = postService.getAllPostsOrderedByDate();
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
