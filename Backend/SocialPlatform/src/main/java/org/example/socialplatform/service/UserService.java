@@ -118,4 +118,50 @@ public class UserService {
         // This method is just for cache eviction
         LOGGER.debug("Evicting user with email {} from cache", email);
     }
+
+    @Cacheable(value = "userFriends", key = "#userId.toString()")
+    public List<UserDTO> getFriendsOfUser(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User with id " + userId + " not found"));
+
+        return user.getFriends().stream()
+                .map(UserBuilder::toUserDTO)
+                .collect(Collectors.toList());
+    }
+
+    @CacheEvict(value = "userFriends", key = "#userId.toString()")
+    public void evictFriendsCache(UUID userId) {
+        LOGGER.debug("Evicted cached friends list for user {}", userId);
+    }
+
+    @Transactional
+    @CacheEvict(value = "userFriends", key = "#userId.toString()")
+    public void addFriend(UUID userId, UUID friendId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User friend = userRepository.findById(friendId).orElseThrow(() -> new RuntimeException("Friend not found"));
+
+        if (!user.getFriends().contains(friend)) {
+            user.getFriends().add(friend);
+            friend.getFriends().add(user);
+            userRepository.save(user);
+            userRepository.save(friend);
+        }
+    }
+
+    @Transactional
+    @CacheEvict(value = "userFriends", key = "#userId.toString()")
+    public void removeFriend(UUID userId, UUID friendId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User friend = userRepository.findById(friendId).orElseThrow(() -> new RuntimeException("Friend not found"));
+
+        if (user.getFriends().contains(friend)) {
+            user.getFriends().remove(friend);
+            friend.getFriends().remove(user);
+            userRepository.save(user);
+            userRepository.save(friend);
+        }
+    }
+
+
+
 }
