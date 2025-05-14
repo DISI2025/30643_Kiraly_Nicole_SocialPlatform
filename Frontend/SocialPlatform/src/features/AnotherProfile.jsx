@@ -5,6 +5,7 @@ import '../styles/UserProfile.css';
 import Navbar from "./NavBar.jsx";
 import SeePost from "../components/SeePost.jsx";
 import { useLocation } from 'react-router-dom';
+import { getUserFriends, addFriend, removeFriend } from "../assets/api-profile.jsx";
 
 const AnotherProfile = () => {
     const [user, setUser] = useState(null);
@@ -17,6 +18,9 @@ const AnotherProfile = () => {
     const location = useLocation();
     const searchParams = new URLSearchParams(location.search);
     const selectedId = searchParams.get("user");
+
+    const loggedUser = JSON.parse(localStorage.getItem("user"));
+    const [isFriend, setIsFriend] = useState(false);
 
     const openPopup = (post) => {
         setSelectedPost(post);
@@ -36,6 +40,9 @@ const AnotherProfile = () => {
                 const userData = await findUserById(selectedId);
                 const postsData = await getPostsByUserId(selectedId);
 
+                const friendsList = await getUserFriends();
+                const isFriendNow = friendsList.some(friend => friend.id === selectedId);
+                setIsFriend(isFriendNow);
                 setUser(userData);
                 setPosts(postsData);
                 setLoading(false);
@@ -54,6 +61,19 @@ const AnotherProfile = () => {
 
     const handleLoadAlbum = () => {
         setAlbumOpen(!albumOpen);
+    };
+
+    const handleToggleFriend = async () => {
+        try {
+            if (isFriend) {
+                await removeFriend(selectedId);
+            } else {
+                await addFriend(selectedId);
+            }
+            setIsFriend(!isFriend);
+        } catch (err) {
+            console.error("Failed to toggle friend:", err);
+        }
     };
 
     if (loading) {
@@ -83,6 +103,11 @@ const AnotherProfile = () => {
                                 }}
                             />
                             <h1 className="profile-name">{user?.firstName} {user?.lastName}</h1>
+                            {user?.id !== loggedUser?.id && (
+                                <button onClick={handleToggleFriend} className="friendButton">
+                                    {isFriend ? "Remove Friend" : "Add Friend"}
+                                </button>
+                            )}
                         </div>
                         {/* Fără butoane de edit/admin */}
                     </div>

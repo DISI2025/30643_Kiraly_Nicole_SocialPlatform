@@ -18,6 +18,11 @@ button:hover {
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
     background: linear-gradient(135deg, #145067, #1b6b8f);
 }
+.feedLayout {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+}
 
 .newsFeedContainer {
     width: 60vw;
@@ -221,4 +226,65 @@ button:hover {
     margin-bottom: 15px;
     text-align: center;
     font-weight: bold;
+}
+
+.friendsSidebarFixed {
+    position: fixed;
+    top: 80px;
+    right: 0;
+    width: 260px;
+    background: linear-gradient(to bottom right, #ffffff, #f2f2f2);
+    padding: 20px;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-left: 2px solid #ccc;
+    z-index: 999;
+}
+
+.friendsSidebarFixed h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #0C2734;
+    font-weight: bold;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 5px;
+    width: 100%;
+    text-align: center;
+}
+
+.friendCard {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 12px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s, background-color 0.2s;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.friendCard:hover {
+    background-color: #eaf6ff;
+    transform: translateY(-2px);
+}
+.friendAvatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #0C2734;
+}
+
+.friendName {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0C2734;
 }
