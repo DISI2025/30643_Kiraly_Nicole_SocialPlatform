@@ -1,22 +1,22 @@
-.user-card-list {
-    display: flex;
-    flex-wrap: wrap; /* Ensures cards wrap instead of overlapping */
-    justify-content: center; /* Centers the cards */
-    gap: 20px; /* Increases spacing */
-    margin-top: 20px;
-    padding: 0 20px;
-    width: 100%;
-}
+/*.user-card-list {*/
+/*    display: flex;*/
+/*    flex-wrap: wrap; !* Ensures cards wrap instead of overlapping *!*/
+/*    justify-content: center; !* Centers the cards *!*/
+/*    gap: 20px; !* Increases spacing *!*/
+/*    margin-top: 20px;*/
+/*    padding: 0 20px;*/
+/*    width: 100%;*/
+/*}*/
 
 
-/* Mobile Responsiveness */
-@media (max-width: 600px) {
-    .user-card-list {
-        flex-direction: column; /* Stack cards vertically */
-        align-items: center; /* Center cards */
-    }
+/*!* Mobile Responsiveness *!*/
+/*@media (max-width: 600px) {*/
+/*    .user-card-list {*/
+/*        flex-direction: column; !* Stack cards vertically *!*/
+/*        align-items: center; !* Center cards *!*/
+/*    }*/
 
-    .user-card {
-        width: 90%; /* Make cards take most of the screen width */
-    }
-}
+/*    .user-card {*/
+/*        width: 90%; !* Make cards take most of the screen width *!*/
+/*    }*/
+/*}*/

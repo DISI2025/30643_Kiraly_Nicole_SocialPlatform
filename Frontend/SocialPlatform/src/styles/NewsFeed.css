@@ -20,8 +20,9 @@ button:hover {
 }
 
 .newsFeedContainer {
+
     width: 60vw;
-    padding: 20px;
+    padding-top: 70px;
     background-color: #e0e0e0;
     min-height: 100vh;
     display: flex;
@@ -142,7 +143,8 @@ button:hover {
 .createPostButton {
     background: linear-gradient(135deg, #0C2734, #145067);
     color: white;
-    padding: 12px 24px;
+    padding-top: 8px;
+    padding-bottom: 30px;
     border: none;
     border-radius: 9999px;
     cursor: pointer;
@@ -194,7 +196,8 @@ button:hover {
 .submitButton {
     background: linear-gradient(135deg, #0C2734, #145067);
     color: white;
-    padding: 12px 24px;
+    padding-top: 8px;
+    padding-bottom: 30px;
     border: none;
     border-radius: 9999px;
     cursor: pointer;
