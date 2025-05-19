@@ -57,6 +57,12 @@ public class PostController {
         return new ResponseEntity<>(postDTO, HttpStatus.OK);
     }
 
+    @PutMapping(value = "/like-post/{id}/{userId}")
+    public ResponseEntity<PostDTO> likePost(@PathVariable("id") UUID postId, @PathVariable("userId") UUID userId) {
+        PostDTO postDTO = postService.likePost(postId, userId);
+        return new ResponseEntity<>(postDTO, HttpStatus.OK);
+    }
+
     @Transactional
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<UUID> deletePost(@PathVariable("id") UUID postId) {

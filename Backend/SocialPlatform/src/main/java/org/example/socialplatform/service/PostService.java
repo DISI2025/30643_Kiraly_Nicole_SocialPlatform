@@ -1,14 +1,15 @@
 package org.example.socialplatform.service;
 
 import jakarta.transaction.Transactional;
-import org.example.socialplatform.dto.*;
+import org.example.socialplatform.dto.PostBuilder;
+import org.example.socialplatform.dto.PostDTO;
+import org.example.socialplatform.dto.PostRequestDTO;
 import org.example.socialplatform.entity.Post;
 import org.example.socialplatform.entity.User;
 import org.example.socialplatform.repository.PostRepository;
 import org.example.socialplatform.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -50,7 +51,7 @@ public class PostService {
     public PostDTO getPostById(UUID id) {
         LOGGER.info("Fetching post by ID: {}", id);
         Optional<Post> postOptional = postRepository.findById(id);
-        if(postOptional.isEmpty()) {
+        if (postOptional.isEmpty()) {
             LOGGER.error("Post with id {} not found", id);
             throw new RuntimeException("Post with id " + id + " not found");
         }
@@ -62,7 +63,7 @@ public class PostService {
     public UUID insert(PostRequestDTO postDTO) {
         Post post = PostBuilder.toPost(postDTO);
         Optional<User> user = userRepository.findById(postDTO.getUserId());
-        if(user.isPresent()){
+        if (user.isPresent()) {
             post.setUser(user.get());
         } else {
             LOGGER.error("User with id {} not found", postDTO.getUserId());
@@ -84,7 +85,7 @@ public class PostService {
     )
     public PostDTO update(UUID id, PostDTO postDTO) {
         Optional<Post> postOptional = postRepository.findById(id);
-        if(postOptional.isEmpty()) {
+        if (postOptional.isEmpty()) {
             LOGGER.error("Post with id {} not found", id);
             throw new RuntimeException("Post with id " + id + " not found");
         }
@@ -114,13 +115,37 @@ public class PostService {
     }
 
     @Transactional
+    @Caching(
+            put = {
+                    @CachePut(value = "posts", key = "#id.toString()")
+            },
+            evict = {
+                    @CacheEvict(value = "posts", key = "'allPosts'")
+            }
+    )
+    public PostDTO likePost(UUID id, UUID userId) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post with id " + id + " not found"));
+
+        if (post.getLikes().contains(userId)) {
+            return PostBuilder.toPostDTO(post);
+        }
+
+        List<UUID> likes = post.getLikes();
+        likes.add(userId);
+        post.setLikes(likes);
+        post.setNoLikes(post.getNoLikes() + 1);
+        post = postRepository.save(post);
+        return PostBuilder.toPostDTO(post);
+    }
+
+    @Transactional
     @Caching(evict = {
             @CacheEvict(value = "posts", key = "#id.toString()"),
             @CacheEvict(value = "posts", key = "'allPosts'")
     })
     public void delete(UUID id) {
         Optional<Post> postOptional = postRepository.findById(id);
-        if(postOptional.isEmpty()) {
+        if (postOptional.isEmpty()) {
             LOGGER.error("Post with id {} not found", id);
             throw new RuntimeException("Post with id " + id + " not found");
         }
@@ -148,7 +173,7 @@ public class PostService {
     @Transactional
     public PostDTO blockPost(UUID id) {
         Optional<Post> postOptional = postRepository.findById(id);
-        if(postOptional.isEmpty()) {
+        if (postOptional.isEmpty()) {
             LOGGER.error("Post with id {} not found", id);
             throw new RuntimeException("Post with id " + id + " not found");
         }

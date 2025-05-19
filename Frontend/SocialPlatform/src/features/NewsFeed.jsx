@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { getAllPosts, updatePost, createPost } from '../assets/api-feed';
+import React, {useEffect, useState} from 'react';
+import {createPost, getAllPosts, likePost} from '../assets/api-feed';
 import '../styles/NewsFeed.css'; // Imported the stylesheet
 import Navbar from './NavBar.jsx';
-import { UserContext } from '../UserContext';
-import { Toolbar } from '@mui/material';
 
 const NewsFeed = () => {
     const [posts, setPosts] = useState([]);
@@ -63,7 +61,7 @@ const NewsFeed = () => {
             const visiblePosts = updatedPosts.filter(post => post.visible);
             setPosts(visiblePosts);
 
-            setNewPost({ description: '', image: '' });
+            setNewPost({description: '', image: ''});
             setIsFormVisible(false);
         } catch (error) {
             console.error('Error creating post:', error);
@@ -79,24 +77,19 @@ const NewsFeed = () => {
         try {
             setPosts(posts.map(post =>
                 post.id === postId
-                    ? { ...post, noLikes: post.noLikes + 1 }
+                    ? {
+                        ...post,
+                        noLikes: post.likes.includes(user.id) ? post.noLikes : post.noLikes + 1,
+                        likes: post.likes.includes(user.id) ? post.likes : [...post.likes, user.id],
+                    }
                     : post
             ));
-            const updatedPost = posts.find(p => p.id === postId);
-            const postDTO = {
-                image: updatedPost.image,
-                description: updatedPost.description,
-                date: updatedPost.date,
-                user: updatedPost.user,
-                noLikes: updatedPost.noLikes + 1,
-                visible: updatedPost.visible,
-            };
-            await updatePost(postId, postDTO);
+            await likePost(postId, user.id);
         } catch (err) {
             console.error('Error updating like:', err);
             setPosts(posts.map(post =>
                 post.id === postId
-                    ? { ...post, noLikes: post.noLikes - 1 }
+                    ? {...post, noLikes: post.noLikes - 1}
                     : post
             ));
         }
@@ -104,12 +97,12 @@ const NewsFeed = () => {
 
     return (
         <>
-        {user && <Navbar />}
+            {user && <Navbar/>}
             <div className="newsFeedContainer">
                 <h1 className="header">Feed</h1>
 
                 <button onClick={toggleFormVisibility} className="createPostButton">
-                    <b style={{ fontSize: '1rem' }}>+</b> Create New Post
+                    <b style={{fontSize: '1rem'}}>+</b> Create New Post
                 </button>
 
                 {isFormVisible && (
@@ -175,7 +168,9 @@ const NewsFeed = () => {
                                     className="likes"
                                     onClick={() => handleLike(post.id)}
                                 >
-                                    <span className="heart">♥</span>
+                                    {post.likes.includes(user.id)
+                                        ? (<span className="heart">♥</span>)
+                                        : (<span className="heart">♡</span>)}
                                     <span>{post.noLikes}</span>
                                 </div>
                                 <span className="date">

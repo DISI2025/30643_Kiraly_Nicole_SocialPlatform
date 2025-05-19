@@ -1,14 +1,18 @@
 package org.example.socialplatform.entity;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -43,4 +47,9 @@ public class Post implements Serializable {
 
     @Column(name="visible", nullable = false)
     private boolean visible;
+
+
+    @Type(JsonBinaryType.class)
+    @Column(name = "likes", columnDefinition = "jsonb")
+    private List<UUID> likes = new ArrayList<>();
 }
