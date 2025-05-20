@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// import styles from "./UserAdminStyle.css";  // Import your styles
+import "./Modal.css";  // Import your styles
 
 const EditUserModal = ({ user, onClose, onSubmit }) => {
     const [editedUser, setEditedUser] = useState(user); // Local state to hold changes
@@ -148,7 +148,7 @@ const EditUserModal = ({ user, onClose, onSubmit }) => {
                     </div>
 
                     <div className="button-container">
-                        <button type="submit" className="submit-button">
+                        <button type="submit" className="add-button">
                             Update User
                         </button>
                         <button type="button" onClick={onClose} className="cancel-button">
