@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { findUserById } from "../assets/api-profile.jsx";
-import { getPostsByUserId } from '../assets/api-feed';
+import { getVisiblePostsByUserId } from '../assets/api-feed';
 import '../styles/UserProfile.css';
 import Navbar from "./NavBar.jsx";
 import SeePost from "../components/SeePost.jsx";
@@ -34,7 +34,7 @@ const AnotherProfile = () => {
                 if (!selectedId) return;
 
                 const userData = await findUserById(selectedId);
-                const postsData = await getPostsByUserId(selectedId);
+                const postsData = await getVisiblePostsByUserId(selectedId);
 
                 setUser(userData);
                 setPosts(postsData);
