@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { getAllPosts, updatePost, createPost } from '../assets/api-feed';
+import React, {useEffect, useState} from 'react';
+import {createPost, deletePost, getAllPosts, updatePost} from '../assets/api-feed';
 import '../styles/NewsFeed.css'; // Imported the stylesheet
 import Navbar from './NavBar.jsx';
-import { UserContext } from '../UserContext';
-import { Toolbar } from '@mui/material';
 
 const NewsFeed = () => {
     const [posts, setPosts] = useState([]);
@@ -63,7 +61,7 @@ const NewsFeed = () => {
             const visiblePosts = updatedPosts.filter(post => post.visible);
             setPosts(visiblePosts);
 
-            setNewPost({ description: '', image: '' });
+            setNewPost({description: '', image: ''});
             setIsFormVisible(false);
         } catch (error) {
             console.error('Error creating post:', error);
@@ -79,7 +77,7 @@ const NewsFeed = () => {
         try {
             setPosts(posts.map(post =>
                 post.id === postId
-                    ? { ...post, noLikes: post.noLikes + 1 }
+                    ? {...post, noLikes: post.noLikes + 1}
                     : post
             ));
             const updatedPost = posts.find(p => p.id === postId);
@@ -96,20 +94,33 @@ const NewsFeed = () => {
             console.error('Error updating like:', err);
             setPosts(posts.map(post =>
                 post.id === postId
-                    ? { ...post, noLikes: post.noLikes - 1 }
+                    ? {...post, noLikes: post.noLikes - 1}
                     : post
             ));
         }
     };
 
+    const handleBlockPost = async (postId) => {
+        try {
+            const confirmed = window.confirm('Are you sure you want to block this post?');
+            if (confirmed) {
+                setPosts(posts.filter(post => post.id !== postId));
+                await deletePost(postId);
+            }
+        } catch (err) {
+            console.error('Error blocking post:', err);
+            setPosts(posts);
+        }
+    };
+
     return (
         <>
-        {user && <Navbar />}
+            {user && <Navbar/>}
             <div className="newsFeedContainer">
                 <h1 className="header">Feed</h1>
 
                 <button onClick={toggleFormVisibility} className="createPostButton">
-                    <b style={{ fontSize: '1rem' }}>+</b> Create New Post
+                    <b style={{fontSize: '1rem'}}>+</b> Create New Post
                 </button>
 
                 {isFormVisible && (
@@ -143,7 +154,11 @@ const NewsFeed = () => {
                 ) : (
                     posts.map(post => (
                         <div key={post.id || `${post.description}-${Math.random()}`} className="post">
-                            <div className="postHeader">
+                            <div className="postHeader" style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
                                 <div className="userInfo">
                                     <h1 className="userNameWrapper">
                                         <img
@@ -157,6 +172,15 @@ const NewsFeed = () => {
                                     </h1>
                                     <p className="description">{post.description}</p>
                                 </div>
+                                {user.role === 'ADMIN' &&
+                                    <div>
+                                        <button onClick={() => handleBlockPost(post.id)}
+                                                style={{height: '100%', background: "none", color: "orangered"}}>⚠️
+                                            Block
+                                            post
+                                        </button>
+                                    </div>
+                                }
                             </div>
 
 
