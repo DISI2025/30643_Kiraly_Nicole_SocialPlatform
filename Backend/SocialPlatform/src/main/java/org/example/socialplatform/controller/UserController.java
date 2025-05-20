@@ -2,6 +2,7 @@ package org.example.socialplatform.controller;
 
 import jakarta.transaction.Transactional;
 import org.example.socialplatform.config.JwtUtil;
+import org.example.socialplatform.dto.UserBuilder;
 import org.example.socialplatform.dto.UserDTO;
 import org.example.socialplatform.entity.User;
 import org.example.socialplatform.service.UserService;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
@@ -91,4 +93,52 @@ public class UserController {
         userService.removeFriend(user.getId(), friendId);
         return ResponseEntity.ok("Friend removed.");
     }
+
+    @PostMapping("/request-friend/{receiverId}")
+    public ResponseEntity<String> requestFriend(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID receiverId) {
+        String jwt = authorizationHeader.substring(7);
+        String email = jwtUtil.extractEmail(jwt);
+        UserDTO sender = userService.findByEmail(email);
+
+        userService.sendFriendRequest(sender.getId(), receiverId);
+        return ResponseEntity.ok("Friend request sent.");
+    }
+
+    @PostMapping("/accept-friend/{senderId}")
+    public ResponseEntity<String> acceptFriendRequest(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID senderId) {
+        String jwt = authorizationHeader.substring(7);
+        String email = jwtUtil.extractEmail(jwt);
+        UserDTO receiver = userService.findByEmail(email);
+
+        userService.acceptFriendRequest(receiver.getId(), senderId);
+        return ResponseEntity.ok("Friend request accepted.");
+    }
+
+    @DeleteMapping("/reject-friend/{senderId}")
+    public ResponseEntity<String> rejectFriendRequest(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID senderId) {
+        String jwt = authorizationHeader.substring(7);
+        String email = jwtUtil.extractEmail(jwt);
+        UserDTO receiver = userService.findByEmail(email);
+
+        userService.rejectFriendRequest(receiver.getId(), senderId);
+        return ResponseEntity.ok("Friend request rejected.");
+    }
+    @GetMapping("/pending-requests")
+    public ResponseEntity<List<UserDTO>> getPendingFriendRequests(
+            @RequestHeader("Authorization") String authorizationHeader) {
+        String jwt = authorizationHeader.substring(7);
+        String email = jwtUtil.extractEmail(jwt);
+        UserDTO user = userService.findByEmail(email);
+        List<UserDTO> requests = userService.getPendingFriendRequests(user.getId());
+
+        return new ResponseEntity<>(requests, HttpStatus.OK);
+    }
+
+
 }

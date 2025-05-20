@@ -40,7 +40,7 @@ const SeePost = ({post, user, onClose}) => {
                 <div className="popup-right">
                     <div className="user-info">
                         <img
-                            src={user?.image || '/default-profile.png'}
+                            src={user?.image || './default_image.jpg'}
                             alt="User"
                             className="popup-user-image"
                         />

@@ -1,5 +1,6 @@
 package org.example.socialplatform.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -44,7 +45,7 @@ public class User implements Serializable {
     @Column(name="image")
     private String image;
 
-    @JsonIgnoreProperties({"friends"})
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_friends",
@@ -52,4 +53,15 @@ public class User implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "friend_id")
     )
     private List<User> friends = new ArrayList<>();
+
+    @JsonIgnoreProperties({"friendRequests"})
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "friend_requests",
+            joinColumns = @JoinColumn(name = "receiver_id"),
+            inverseJoinColumns = @JoinColumn(name = "sender_id")
+    )
+    private List<User> friendRequests = new ArrayList<>();
+
+
 }

@@ -31,5 +31,7 @@ public class UserDTO {
     @NotNull
     private String image;
     private List<UserDTO> friends;
+    private List<UserDTO> friendRequests;
+
 
 }

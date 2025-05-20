@@ -38,7 +38,7 @@ function App() {
                     <Route path="/news-feed" element={<NewsFeed />} />
                     <Route path="/profile" element={<UserProfile />} />
                     <Route path="/management-profile" element={<ProfileManagement />} />
-                    <Route path="/another-profile" element={<AnotherProfile />} />
+                    <Route path="/another-profile" element={<AnotherProfile key={location.key}/>} />
                 </Routes>
             </div>
         </Router>

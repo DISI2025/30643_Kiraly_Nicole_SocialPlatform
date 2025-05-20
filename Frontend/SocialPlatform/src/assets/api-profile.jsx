@@ -113,3 +113,51 @@ export const getUserFriends = async () => {
         throw new Error(error.response?.data?.message || 'Failed to fetch friends list');
     }
 };
+
+export const sendFriendRequest = async (receiverId) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/request-friend/${receiverId}`, {}, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to send friend request');
+    }
+};
+
+export const acceptFriendRequest = async (senderId) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/accept-friend/${senderId}`, {}, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to accept friend request');
+    }
+};
+
+export const getPendingFriendRequests = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/pending-requests`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to fetch pending friend requests');
+    }
+};
+
+export const rejectFriendRequest = async (senderId) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`http://localhost:8080/user/reject-friend/${senderId}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to reject friend request");
+    }
+};
+

@@ -2,6 +2,8 @@ package org.example.socialplatform.dto;
 
 import org.example.socialplatform.entity.User;
 
+import java.util.stream.Collectors;
+
 public class UserBuilder {
     private UserBuilder(){
 
@@ -27,6 +29,15 @@ public class UserBuilder {
                         return f;
                     }).toList());
         }
+        if (user.getFriendRequests() != null) {
+            dto.setFriendRequests(
+                    user.getFriendRequests().stream()
+                            .map(UserBuilder::toUserDTO)
+                            .collect(Collectors.toList())
+            );
+
+        }
+
 
         return dto;
     }

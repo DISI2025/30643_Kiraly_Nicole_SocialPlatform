@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { findUserById } from "../assets/api-profile.jsx";
+import React, {useEffect, useMemo, useState} from 'react';
+import {findUserById, getPendingFriendRequests, sendFriendRequest, rejectFriendRequest, acceptFriendRequest} from "../assets/api-profile.jsx";
 import { getVisiblePostsByUserId } from '../assets/api-feed';
 import '../styles/UserProfile.css';
 import Navbar from "./NavBar.jsx";
@@ -17,7 +17,6 @@ const AnotherProfile = () => {
 
     const location = useLocation();
     const searchParams = new URLSearchParams(location.search);
-    const selectedId = searchParams.get("user");
 
     const loggedUser = JSON.parse(localStorage.getItem("user"));
     const [isFriend, setIsFriend] = useState(false);
@@ -30,6 +29,13 @@ const AnotherProfile = () => {
         setSelectedPost(null);
     };
 
+    const [friendRequestSent, setFriendRequestSent] = useState(false);
+    const [incomingRequest, setIncomingRequest] = useState(false);
+
+
+    const selectedId = useMemo(() => {
+        return new URLSearchParams(location.search).get("user");
+    }, [location.search]);
     useEffect(() => {
         document.body.classList.add('user-profile-page');
 
@@ -37,14 +43,28 @@ const AnotherProfile = () => {
             try {
                 if (!selectedId) return;
 
-                const userData = await findUserById(selectedId);
-                const postsData = await getVisiblePostsByUserId(selectedId);
+                const [userData, postsData, friendsList, pendingRequests] = await Promise.all([
+                    findUserById(selectedId),
+                    getVisiblePostsByUserId(selectedId),
+                    getUserFriends(),
+                    getPendingFriendRequests()
+                ]);
 
-                const friendsList = await getUserFriends();
                 const isFriendNow = friendsList.some(friend => friend.id === selectedId);
-                setIsFriend(isFriendNow);
+                const theyRequested = pendingRequests.some(req => req.id === selectedId);
+
+                // ✅ Verificăm dacă în localStorage există cerere trimisă către acest user
+                const sentRequests = JSON.parse(localStorage.getItem("sentFriendRequests") || "{}");
+                const youRequested = sentRequests[selectedId] || (
+                    Array.isArray(userData.friendRequests) &&
+                    userData.friendRequests.some(req => req.id === loggedUser.id)
+                );
+
                 setUser(userData);
                 setPosts(postsData);
+                setIsFriend(isFriendNow);
+                setIncomingRequest(theyRequested);
+                setFriendRequestSent(youRequested);
                 setLoading(false);
             } catch (error) {
                 console.error("Error loading selected user data:", error);
@@ -57,7 +77,10 @@ const AnotherProfile = () => {
         return () => {
             document.body.classList.remove('user-profile-page');
         };
-    }, [selectedId]); // Adaugă selectedId în array-ul de dependențe
+    }, [selectedId]);
+
+
+
 
     const handleLoadAlbum = () => {
         setAlbumOpen(!albumOpen);
@@ -67,14 +90,31 @@ const AnotherProfile = () => {
         try {
             if (isFriend) {
                 await removeFriend(selectedId);
-            } else {
-                await addFriend(selectedId);
+                setIsFriend(false);
+                const sentRequests = JSON.parse(localStorage.getItem("sentFriendRequests") || "{}");
+                delete sentRequests[selectedId];
+                localStorage.setItem("sentFriendRequests", JSON.stringify(sentRequests));
+            } else if (incomingRequest) {
+                await acceptFriendRequest(selectedId);
+                setIsFriend(true);
+                setIncomingRequest(false);
+                const sentRequests = JSON.parse(localStorage.getItem("sentFriendRequests") || "{}");
+                delete sentRequests[selectedId];
+                localStorage.setItem("sentFriendRequests", JSON.stringify(sentRequests));
+            } else if (!friendRequestSent) {
+                await sendFriendRequest(selectedId);
+                setFriendRequestSent(true);
+
+                // Salvează în localStorage că ai trimis cerere acestui utilizator
+                const sentRequests = JSON.parse(localStorage.getItem("sentFriendRequests") || "{}");
+                sentRequests[selectedId] = true;
+                localStorage.setItem("sentFriendRequests", JSON.stringify(sentRequests));
             }
-            setIsFriend(!isFriend);
         } catch (err) {
-            console.error("Failed to toggle friend:", err);
+            console.error("Failed to manage friend request:", err);
         }
     };
+
 
     if (loading) {
         return (
@@ -84,6 +124,19 @@ const AnotherProfile = () => {
             </div>
         );
     }
+    const handleRejectFriend = async () => {
+        try {
+            await rejectFriendRequest(selectedId);
+            setIncomingRequest(false);
+            const sentRequests = JSON.parse(localStorage.getItem("sentFriendRequests") || "{}");
+            delete sentRequests[selectedId];
+            localStorage.setItem("sentFriendRequests", JSON.stringify(sentRequests));
+        } catch (err) {
+            console.error("Failed to reject friend request", err);
+        }
+    };
+
+
 
     return (
         <>
@@ -94,19 +147,30 @@ const AnotherProfile = () => {
                     <div className="profile-header-container">
                         <div className="profile-identity">
                             <img
-                                src={user?.image || '/default-profile.png'}
+                                src={user?.image || './default_image.jpg'}
                                 alt="Profile"
                                 className="profile-picture"
                                 onError={(e) => {
                                     e.target.onerror = null;
-                                    e.target.src = '/default-profile.png';
+                                    e.target.src = './default_image.jpg';
                                 }}
                             />
                             <h1 className="profile-name">{user?.firstName} {user?.lastName}</h1>
                             {user?.id !== loggedUser?.id && (
-                                <button onClick={handleToggleFriend} className="friendButton">
-                                    {isFriend ? "Remove Friend" : "Add Friend"}
-                                </button>
+                                isFriend ? (
+                                    <button onClick={handleToggleFriend} className="friendButton">Remove Friend</button>
+                                ) : incomingRequest ? (
+                                    <>
+                                        <button onClick={handleToggleFriend} className="friendButton">Accept Request</button>
+                                        <button onClick={handleRejectFriend} className="friendButton" style={{ marginLeft: 10 }}>
+                                            Reject
+                                        </button>
+                                    </>
+                                ) : friendRequestSent ? (
+                                    <button className="friendButton" disabled>Request Sent</button>
+                                ) : (
+                                    <button onClick={handleToggleFriend} className="friendButton">Add Friend</button>
+                                )
                             )}
                         </div>
                         {/* Fără butoane de edit/admin */}
