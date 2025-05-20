@@ -23,6 +23,8 @@ const NewsFeed = () => {
     const handleFriendClick = (friendId) => {
         navigate(`/another-profile?user=${friendId}`);
     };
+    const [showFriends, setShowFriends] = useState(true);
+
 
 
 
@@ -233,22 +235,34 @@ const NewsFeed = () => {
                         ))
                     )}
                 </div>
-                <aside className="friendsSidebarFixed">
+                <button
+                    onClick={() => setShowFriends(!showFriends)}
+                    className={`sidebarToggleArrowFixed ${showFriends ? 'arrowOnOpen' : 'arrowOnClosed'}`}
+                >
+                    {showFriends ? '❮' : '❯'}
+                </button>
+
+                <aside className={`friendsSidebarFixed ${showFriends ? 'slideIn' : 'slideOut'}`}>
                     <h3>Friends</h3>
-                    {friends.length === 0 ? <p>No friends yet.</p> : (
+                    {friends.length === 0 ? (
+                        <p>No friends yet.</p>
+                    ) : (
                         friends.map(friend => (
                             <div
                                 key={friend.id}
                                 className="friendCard"
                                 onClick={() => handleFriendClick(friend.id)}
-                                style={{ cursor: 'pointer' }}
                             >
-                                <img src={friend.image} alt={friend.firstName} className="friendAvatar" />
+                                <div className="avatarWrapper">
+                                    <img src={friend.image} alt={friend.firstName} className="friendAvatar" />
+                                    <span className="onlineDot" />
+                                </div>
                                 <div className="friendName">{friend.firstName} {friend.lastName}</div>
                             </div>
                         ))
                     )}
                 </aside>
+
             </div>
         </>
     );

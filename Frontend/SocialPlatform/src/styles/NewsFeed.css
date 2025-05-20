@@ -262,32 +262,98 @@ button:hover {
 .friendCard {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
     width: 100%;
-    padding: 10px;
-    border-radius: 12px;
-    background-color: #ffffff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-    transition: transform 0.2s, background-color 0.2s;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: linear-gradient(to right, #f9f9f9, #f1f1f1);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
     margin-bottom: 12px;
     cursor: pointer;
+    transition: all 0.3s ease;
+    gap: 12px;
+    position: relative;
 }
 
 .friendCard:hover {
-    background-color: #eaf6ff;
-    transform: translateY(-2px);
+    background: linear-gradient(to right, #d7eaff, #e8f3ff);
+    transform: scale(1.02);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 .friendAvatar {
-    width: 45px;
-    height: 45px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #0C2734;
+    transition: transform 0.3s;
+}
+
+.friendCard:hover .friendAvatar {
+    transform: scale(1.05);
 }
 
 .friendName {
-    font-size: 15px;
+    font-size: 1rem;
     font-weight: 600;
     color: #0C2734;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
+.avatarWrapper {
+    position: relative;
+    width: 50px;
+    height: 50px;
+}
+
+.onlineDot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 12px;
+    height: 12px;
+    background-color: #28a745; /* green */
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.friendsSidebarFixed {
+    transition: transform 0.4s ease-in-out;
+}
+
+.slideIn {
+    transform: translateX(0%);
+}
+
+.slideOut {
+    transform: translateX(100%);
+}
+.sidebarToggleArrowFixed {
+    position: fixed;
+    top: 100px;
+    right: 260px; /* when sidebar is visible */
+    width: 32px;
+    height: 32px;
+    background-color: #0C2734;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: right 0.4s ease-in-out;
+}
+
+.arrowOnClosed {
+    right: 0;
+}
+
+
+
