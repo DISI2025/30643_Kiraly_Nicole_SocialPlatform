@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {getAllPosts, updatePost, createPost} from '../assets/api-feed';
+import {createPost, deletePost, getAllPosts, updatePost} from '../assets/api-feed';
 import '../styles/NewsFeed.css'; // Imported the stylesheet
 import {getUserFriends, addFriend, removeFriend} from '../assets/api-profile';
 import Navbar from './NavBar.jsx';
@@ -122,6 +122,19 @@ const NewsFeed = () => {
         }
     };
 
+    const handleBlockPost = async (postId) => {
+        try {
+            const confirmed = window.confirm('Are you sure you want to block this post?');
+            if (confirmed) {
+                setPosts(posts.filter(post => post.id !== postId));
+                await deletePost(postId);
+            }
+        } catch (err) {
+            console.error('Error blocking post:', err);
+            setPosts(posts);
+        }
+    };
+
     return (
         <>
             {user && <Navbar/>}
@@ -129,9 +142,9 @@ const NewsFeed = () => {
                 <div className="newsFeedContainer">
                     <h1 className="header">Feed</h1>
 
-                    <button onClick={toggleFormVisibility} className="createPostButton">
-                        <b style={{fontSize: '1rem'}}>+</b> Create New Post
-                    </button>
+                <button onClick={toggleFormVisibility} className="createPostButton">
+                    <b style={{ fontSize: '1rem' }}>+</b> Create New Post
+                </button>
 
                     {isFormVisible && (
                         <form onSubmit={handlePostSubmit} className="formContainer">
@@ -159,26 +172,39 @@ const NewsFeed = () => {
                         </form>
                     )}
 
-                    {posts.length === 0 ? (
-                        <p className="noPosts">No posts available</p>
-                    ) : (
-                        posts.map(post => (
-                            <div key={post.id || `${post.description}-${Math.random()}`} className="post">
-                                <div className="postHeader">
-                                    <div className="userInfo">
-                                        <h1 className="userNameWrapper">
-                                            <img
-                                                src={post.user?.image}
-                                                alt={post.user?.firstName}
-                                                className="userImage"
-                                            />
-                                            <span className="userName">
+                {posts.length === 0 ? (
+                    <p className="noPosts">No posts available</p>
+                ) : (
+                    posts.map(post => (
+                        <div key={post.id || `${post.description}-${Math.random()}`} className="post">
+                            <div className="postHeader" style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
+                                <div className="userInfo">
+                                    <h1 className="userNameWrapper">
+                                        <img
+                                            src={post.user?.image}
+                                            alt={post.user?.firstName}
+                                            className="userImage"
+                                        />
+                                        <span className="userName">
                                             {post.user?.firstName} {post.user?.lastName}
                                         </span>
-                                        </h1>
-                                        <p className="description">{post.description}</p>
-                                    </div>
+                                    </h1>
+                                    <p className="description">{post.description}</p>
                                 </div>
+                                {user.role === 'ADMIN' &&
+                                    <div>
+                                        <button onClick={() => handleBlockPost(post.id)}
+                                                style={{height: '100%', background: "none", color: "orangered"}}>⚠️
+                                            Block
+                                            post
+                                        </button>
+                                    </div>
+                                }
+                            </div>
 
 
                                 {post.image && (
