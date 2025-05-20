@@ -1,7 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import {createPost, deletePost, getAllPosts, updatePost} from '../assets/api-feed';
 import '../styles/NewsFeed.css'; // Imported the stylesheet
+import {getUserFriends, addFriend, removeFriend} from '../assets/api-profile';
 import Navbar from './NavBar.jsx';
+import {UserContext} from '../UserContext';
+import {Toolbar} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+
 
 const NewsFeed = () => {
     const [posts, setPosts] = useState([]);
@@ -12,7 +17,16 @@ const NewsFeed = () => {
         image: '',
     });
     const [isFormVisible, setIsFormVisible] = useState(false);
+    const [friends, setFriends] = useState([]);
     const user = JSON.parse(localStorage.getItem('user'));
+    const navigate = useNavigate();
+    const handleFriendClick = (friendId) => {
+        navigate(`/another-profile?user=${friendId}`);
+    };
+    const [showFriends, setShowFriends] = useState(true);
+
+
+
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -27,7 +41,17 @@ const NewsFeed = () => {
                 setLoading(false);
             }
         };
+        const fetchFriends = async () => {
+            try {
+                const friendsList = await getUserFriends();
+                setFriends(friendsList);
+            } catch (err) {
+                console.error("Error fetching friends", err);
+            }
+        };
+
         fetchPosts();
+        fetchFriends();
     }, []);
 
     const handleFormChange = (e) => {
@@ -116,38 +140,39 @@ const NewsFeed = () => {
     return (
         <>
             {user && <Navbar/>}
-            <div className="newsFeedContainer">
-                <h1 className="header">Feed</h1>
+            <div className="feedLayout">
+                <div className="newsFeedContainer">
+                    <h1 className="header">Feed</h1>
 
                 <button onClick={toggleFormVisibility} className="createPostButton">
-                    <b style={{fontSize: '1rem'}}>+</b> Create New Post
+                    <b style={{ fontSize: '1rem' }}>+</b> Create New Post
                 </button>
 
-                {isFormVisible && (
-                    <form onSubmit={handlePostSubmit} className="formContainer">
-                        {error && <p className="errorMessage">{error}</p>}
-                        <textarea
-                            name="description"
-                            placeholder="Description"
-                            value={newPost.description}
-                            onChange={handleFormChange}
-                            onInput={(e) => {
-                                e.target.style.height = 'auto';
-                                e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
-                            }}
-                            className="textarea"
-                        />
-                        <input
-                            type="text"
-                            name="image"
-                            placeholder="Enter Image URL"
-                            value={newPost.image}
-                            onChange={handleFormChange}
-                            className="inputField"
-                        />
-                        <button type="submit" className="submitButton">Submit</button>
-                    </form>
-                )}
+                    {isFormVisible && (
+                        <form onSubmit={handlePostSubmit} className="formContainer">
+                            {error && <p className="errorMessage">{error}</p>}
+                            <textarea
+                                name="description"
+                                placeholder="Description"
+                                value={newPost.description}
+                                onChange={handleFormChange}
+                                onInput={(e) => {
+                                    e.target.style.height = 'auto';
+                                    e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
+                                }}
+                                className="textarea"
+                            />
+                            <input
+                                type="text"
+                                name="image"
+                                placeholder="Enter Image URL"
+                                value={newPost.image}
+                                onChange={handleFormChange}
+                                className="inputField"
+                            />
+                            <button type="submit" className="submitButton">Submit</button>
+                        </form>
+                    )}
 
                 {posts.length === 0 ? (
                     <p className="noPosts">No posts available</p>
@@ -184,31 +209,60 @@ const NewsFeed = () => {
                             </div>
 
 
-                            {post.image && (
-                                <div className="postContent">
-                                    <img
-                                        src={post.image}
-                                        alt="Post"
-                                        className="postImage"
-                                    />
-                                </div>
-                            )}
+                                {post.image && (
+                                    <div className="postContent">
+                                        <img
+                                            src={post.image}
+                                            alt="Post"
+                                            className="postImage"
+                                        />
+                                    </div>
+                                )}
 
-                            <div className="postFooter">
-                                <div
-                                    className="likes"
-                                    onClick={() => handleLike(post.id)}
-                                >
-                                    <span className="heart">♥</span>
-                                    <span>{post.noLikes}</span>
-                                </div>
-                                <span className="date">
+                                <div className="postFooter">
+                                    <div
+                                        className="likes"
+                                        onClick={() => handleLike(post.id)}
+                                    >
+                                        <span className="heart">♥</span>
+                                        <span>{post.noLikes}</span>
+                                    </div>
+                                    <span className="date">
                                     {post.date ? new Date(post.date).toLocaleString() : 'Date not available'}
                                 </span>
+                                </div>
                             </div>
-                        </div>
-                    ))
-                )}
+                        ))
+                    )}
+                </div>
+                <button
+                    onClick={() => setShowFriends(!showFriends)}
+                    className={`sidebarToggleArrowFixed ${showFriends ? 'arrowOnOpen' : 'arrowOnClosed'}`}
+                >
+                    {showFriends ? '❮' : '❯'}
+                </button>
+
+                <aside className={`friendsSidebarFixed ${showFriends ? 'slideIn' : 'slideOut'}`}>
+                    <h3>Friends</h3>
+                    {friends.length === 0 ? (
+                        <p>No friends yet.</p>
+                    ) : (
+                        friends.map(friend => (
+                            <div
+                                key={friend.id}
+                                className="friendCard"
+                                onClick={() => handleFriendClick(friend.id)}
+                            >
+                                <div className="avatarWrapper">
+                                    <img src={friend.image} alt={friend.firstName} className="friendAvatar" />
+                                    <span className="onlineDot" />
+                                </div>
+                                <div className="friendName">{friend.firstName} {friend.lastName}</div>
+                            </div>
+                        ))
+                    )}
+                </aside>
+
             </div>
         </>
     );
