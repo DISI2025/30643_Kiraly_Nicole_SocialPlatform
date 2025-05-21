@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { getAllPosts, updatePost, createPost } from '../assets/api-feed';
+import React, {useEffect, useState} from 'react';
+import {createPost, deletePost, getAllPosts, likePost} from '../assets/api-feed';
 import '../styles/NewsFeed.css'; // Imported the stylesheet
-import {getUserFriends, addFriend, removeFriend} from '../assets/api-profile';
+import {getUserFriends} from '../assets/api-profile';
 import Navbar from './NavBar.jsx';
+import {useNavigate} from "react-router-dom";
 
 const NewsFeed = () => {
     const [posts, setPosts] = useState([]);
@@ -20,9 +21,6 @@ const NewsFeed = () => {
         navigate(`/another-profile?user=${friendId}`);
     };
     const [showFriends, setShowFriends] = useState(true);
-
-
-
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -135,9 +133,9 @@ const NewsFeed = () => {
                 <div className="newsFeedContainer">
                     <h1 className="header">Feed</h1>
 
-                <button onClick={toggleFormVisibility} className="createPostButton">
-                    <b style={{ fontSize: '1rem' }}>+</b> Create New Post
-                </button>
+                    <button onClick={toggleFormVisibility} className="createPostButton">
+                        <b style={{fontSize: '1rem'}}>+</b> Create New Post
+                    </button>
 
                     {isFormVisible && (
                         <form onSubmit={handlePostSubmit} className="formContainer">
@@ -165,39 +163,39 @@ const NewsFeed = () => {
                         </form>
                     )}
 
-                {posts.length === 0 ? (
-                    <p className="noPosts">No posts available</p>
-                ) : (
-                    posts.map(post => (
-                        <div key={post.id || `${post.description}-${Math.random()}`} className="post">
-                            <div className="postHeader" style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                            }}>
-                                <div className="userInfo">
-                                    <h1 className="userNameWrapper">
-                                        <img
-                                            src={post.user?.image}
-                                            alt={post.user?.firstName}
-                                            className="userImage"
-                                        />
-                                        <span className="userName">
+                    {posts.length === 0 ? (
+                        <p className="noPosts">No posts available</p>
+                    ) : (
+                        posts.map(post => (
+                            <div key={post.id || `${post.description}-${Math.random()}`} className="post">
+                                <div className="postHeader" style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <div className="userInfo">
+                                        <h1 className="userNameWrapper">
+                                            <img
+                                                src={post.user?.image}
+                                                alt={post.user?.firstName}
+                                                className="userImage"
+                                            />
+                                            <span className="userName">
                                             {post.user?.firstName} {post.user?.lastName}
                                         </span>
-                                    </h1>
-                                    <p className="description">{post.description}</p>
-                                </div>
-                                {user.role === 'ADMIN' &&
-                                    <div>
-                                        <button onClick={() => handleBlockPost(post.id)}
-                                                style={{height: '100%', background: "none", color: "orangered"}}>⚠️
-                                            Block
-                                            post
-                                        </button>
+                                        </h1>
+                                        <p className="description">{post.description}</p>
                                     </div>
-                                }
-                            </div>
+                                    {user.role === 'ADMIN' &&
+                                        <div>
+                                            <button onClick={() => handleBlockPost(post.id)}
+                                                    style={{height: '100%', background: "none", color: "orangered"}}>⚠️
+                                                Block
+                                                post
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
 
 
                                 {post.image && (
@@ -210,17 +208,17 @@ const NewsFeed = () => {
                                     </div>
                                 )}
 
-                            <div className="postFooter">
-                                <div
-                                    className="likes"
-                                    onClick={() => handleLike(post.id)}
-                                >
-                                    {post.likes.includes(user.id)
-                                        ? (<span className="heart">♥</span>)
-                                        : (<span className="heart">♡</span>)}
-                                    <span>{post.noLikes}</span>
-                                </div>
-                                <span className="date">
+                                <div className="postFooter">
+                                    <div
+                                        className="likes"
+                                        onClick={() => handleLike(post.id)}
+                                    >
+                                        {post.likes.includes(user.id)
+                                            ? (<span className="heart">♥</span>)
+                                            : (<span className="heart">♡</span>)}
+                                        <span>{post.noLikes}</span>
+                                    </div>
+                                    <span className="date">
                                     {post.date ? new Date(post.date).toLocaleString() : 'Date not available'}
                                 </span>
                                 </div>
@@ -247,8 +245,8 @@ const NewsFeed = () => {
                                 onClick={() => handleFriendClick(friend.id)}
                             >
                                 <div className="avatarWrapper">
-                                    <img src={friend.image} alt={friend.firstName} className="friendAvatar" />
-                                    <span className="onlineDot" />
+                                    <img src={friend.image} alt={friend.firstName} className="friendAvatar"/>
+                                    <span className="onlineDot"/>
                                 </div>
                                 <div className="friendName">{friend.firstName} {friend.lastName}</div>
                             </div>
