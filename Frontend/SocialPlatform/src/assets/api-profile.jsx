@@ -80,3 +80,36 @@ export const getUserData = async (jwt) => {
         throw new Error(error.response?.data?.message || 'Failed to fetch user data');
     }
 };
+
+export const addFriend = async (friendId) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/add-friend/${friendId}`, {}, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to add friend');
+    }
+};
+
+export const removeFriend = async (friendId) => {
+    try {
+        const response = await axios.delete(`${API_BASE_URL}/remove-friend/${friendId}`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to remove friend');
+    }
+};
+
+export const getUserFriends = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/friends`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to fetch friends list');
+    }
+};
