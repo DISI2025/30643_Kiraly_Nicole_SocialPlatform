@@ -149,7 +149,10 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = "userFriends", key = "#userId.toString()")
+    @Caching(evict = {
+            @CacheEvict(value = "userFriends", key = "#userId.toString()"),
+            @CacheEvict(value = "userFriends", key = "#friendId.toString()")
+    })
     public void removeFriend(UUID userId, UUID friendId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new RuntimeException("Friend not found"));
@@ -157,11 +160,14 @@ public class UserService {
         if (user.getFriends().contains(friend)) {
             user.getFriends().remove(friend);
             friend.getFriends().remove(user);
+
             userRepository.save(user);
             userRepository.save(friend);
         }
     }
 
+
+    @CacheEvict(value = "users", key = "#receiverId.toString()")
     @Transactional
     public void sendFriendRequest(UUID senderId, UUID receiverId) {
         if (senderId.equals(receiverId)) {
@@ -181,6 +187,7 @@ public class UserService {
             userRepository.save(receiver);
         }
     }
+
 
 
     @Transactional

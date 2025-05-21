@@ -9,6 +9,7 @@ import org.example.socialplatform.entity.ROLE;
 import org.example.socialplatform.entity.User;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -30,8 +31,8 @@ public class UserDTO {
     private ROLE role;
     @NotNull
     private String image;
-    private List<UserDTO> friends;
-    private List<UserDTO> friendRequests;
+    private Set<UserDTO> friends;
+    private Set<UserDTO> friendRequests;
 
 
 }

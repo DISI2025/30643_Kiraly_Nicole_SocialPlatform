@@ -24,6 +24,7 @@ const Login = () => {
             localStorage.setItem('user', JSON.stringify(user));
             login(user, jwt);
             navigate('/news-feed');
+            window.location.reload();
         } catch (err) {
             setError(err.message);
         }
