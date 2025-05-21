@@ -1,6 +1,7 @@
 package org.example.socialplatform.controller;
 
 
+import jakarta.transaction.Transactional;
 import org.example.socialplatform.config.JwtUtil;
 import org.example.socialplatform.dto.LoginRequest;
 import org.example.socialplatform.dto.LoginResponse;
@@ -101,6 +102,8 @@ public class AuthController {
 
         return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
     }
+
+    @Transactional
     @GetMapping("/user")
     public ResponseEntity<UserDTO> getUserData(@RequestHeader("Authorization") String authorizationHeader) {
         String jwtToken = authorizationHeader.substring(7);  // Remove "Bearer " prefix
