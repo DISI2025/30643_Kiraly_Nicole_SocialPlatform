@@ -2,6 +2,8 @@ package org.example.socialplatform.dto;
 
 import org.example.socialplatform.entity.Post;
 
+import java.util.ArrayList;
+
 public class PostBuilder {
     private PostBuilder(){
 
@@ -13,7 +15,8 @@ public class PostBuilder {
                 post.getDate(),
                 post.getUser(),
                 post.getNoLikes(),
-                post.isVisible());
+                post.isVisible(),
+                post.getLikes());
     }
 
     public static PostRequestDTO toPostRequestDTO(Post post){
@@ -33,7 +36,8 @@ public class PostBuilder {
                 postDTO.getDate(),
                 postDTO.getUser(),
                 postDTO.getNoLikes(),
-                postDTO.isVisible());
+                postDTO.isVisible(),
+                postDTO.getLikes());
     }
 
     public static Post toPost(PostRequestDTO postDTO){
@@ -43,6 +47,7 @@ public class PostBuilder {
                 postDTO.getDate(),
                 null,
                 postDTO.getNoLikes(),
-                postDTO.isVisible());
+                postDTO.isVisible(),
+                new ArrayList<>());
     }
 }

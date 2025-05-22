@@ -75,6 +75,18 @@ export const updatePost = async (postId, postDTO) => {
     }
 };
 
+// Like post
+export const likePost = async (postId, userId) => {
+    try {
+        const response = await axios.put(`${API_BASE_URL}/like-post/${postId}/${userId}`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to update post');
+    }
+};
+
 // Delete post
 export const deletePost = async (postId) => {
     try {

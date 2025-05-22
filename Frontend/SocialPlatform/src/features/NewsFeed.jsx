@@ -1,12 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {createPost, deletePost, getAllPosts, updatePost} from '../assets/api-feed';
+import {createPost, deletePost, getAllPosts, likePost} from '../assets/api-feed';
 import '../styles/NewsFeed.css'; // Imported the stylesheet
-import {getUserFriends, addFriend, removeFriend} from '../assets/api-profile';
+import {getUserFriends} from '../assets/api-profile';
 import Navbar from './NavBar.jsx';
-import {UserContext} from '../UserContext';
-import {Toolbar} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-
+import {useNavigate} from "react-router-dom";
 
 const NewsFeed = () => {
     const [posts, setPosts] = useState([]);
@@ -24,9 +21,6 @@ const NewsFeed = () => {
         navigate(`/another-profile?user=${friendId}`);
     };
     const [showFriends, setShowFriends] = useState(true);
-
-
-
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -101,19 +95,14 @@ const NewsFeed = () => {
         try {
             setPosts(posts.map(post =>
                 post.id === postId
-                    ? {...post, noLikes: post.noLikes + 1}
+                    ? {
+                        ...post,
+                        noLikes: post.likes.includes(user.id) ? post.noLikes : post.noLikes + 1,
+                        likes: post.likes.includes(user.id) ? post.likes : [...post.likes, user.id],
+                    }
                     : post
             ));
-            const updatedPost = posts.find(p => p.id === postId);
-            const postDTO = {
-                image: updatedPost.image,
-                description: updatedPost.description,
-                date: updatedPost.date,
-                user: updatedPost.user,
-                noLikes: updatedPost.noLikes + 1,
-                visible: updatedPost.visible,
-            };
-            await updatePost(postId, postDTO);
+            await likePost(postId, user.id);
         } catch (err) {
             console.error('Error updating like:', err);
             setPosts(posts.map(post =>
@@ -144,9 +133,9 @@ const NewsFeed = () => {
                 <div className="newsFeedContainer">
                     <h1 className="header">Feed</h1>
 
-                <button onClick={toggleFormVisibility} className="createPostButton">
-                    <b style={{ fontSize: '1rem' }}>+</b> Create New Post
-                </button>
+                    <button onClick={toggleFormVisibility} className="createPostButton">
+                        <b style={{fontSize: '1rem'}}>+</b> Create New Post
+                    </button>
 
                     {isFormVisible && (
                         <form onSubmit={handlePostSubmit} className="formContainer">
@@ -174,39 +163,39 @@ const NewsFeed = () => {
                         </form>
                     )}
 
-                {posts.length === 0 ? (
-                    <p className="noPosts">No posts available</p>
-                ) : (
-                    posts.map(post => (
-                        <div key={post.id || `${post.description}-${Math.random()}`} className="post">
-                            <div className="postHeader" style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                            }}>
-                                <div className="userInfo">
-                                    <h1 className="userNameWrapper">
-                                        <img
-                                            src={post.user?.image}
-                                            alt={post.user?.firstName}
-                                            className="userImage"
-                                        />
-                                        <span className="userName">
+                    {posts.length === 0 ? (
+                        <p className="noPosts">No posts available</p>
+                    ) : (
+                        posts.map(post => (
+                            <div key={post.id || `${post.description}-${Math.random()}`} className="post">
+                                <div className="postHeader" style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <div className="userInfo">
+                                        <h1 className="userNameWrapper">
+                                            <img
+                                                src={post.user?.image}
+                                                alt={post.user?.firstName}
+                                                className="userImage"
+                                            />
+                                            <span className="userName">
                                             {post.user?.firstName} {post.user?.lastName}
                                         </span>
-                                    </h1>
-                                    <p className="description">{post.description}</p>
-                                </div>
-                                {user.role === 'ADMIN' &&
-                                    <div>
-                                        <button onClick={() => handleBlockPost(post.id)}
-                                                style={{height: '100%', background: "none", color: "orangered"}}>⚠️
-                                            Block
-                                            post
-                                        </button>
+                                        </h1>
+                                        <p className="description">{post.description}</p>
                                     </div>
-                                }
-                            </div>
+                                    {user.role === 'ADMIN' &&
+                                        <div>
+                                            <button onClick={() => handleBlockPost(post.id)}
+                                                    style={{height: '100%', background: "none", color: "orangered"}}>⚠️
+                                                Block
+                                                post
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
 
 
                                 {post.image && (
@@ -224,7 +213,9 @@ const NewsFeed = () => {
                                         className="likes"
                                         onClick={() => handleLike(post.id)}
                                     >
-                                        <span className="heart">♥</span>
+                                        {post.likes.includes(user.id)
+                                            ? (<span className="heart">♥</span>)
+                                            : (<span className="heart">♡</span>)}
                                         <span>{post.noLikes}</span>
                                     </div>
                                     <span className="date">
@@ -254,8 +245,8 @@ const NewsFeed = () => {
                                 onClick={() => handleFriendClick(friend.id)}
                             >
                                 <div className="avatarWrapper">
-                                    <img src={friend.image} alt={friend.firstName} className="friendAvatar" />
-                                    <span className="onlineDot" />
+                                    <img src={friend.image} alt={friend.firstName} className="friendAvatar"/>
+                                    <span className="onlineDot"/>
                                 </div>
                                 <div className="friendName">{friend.firstName} {friend.lastName}</div>
                             </div>
