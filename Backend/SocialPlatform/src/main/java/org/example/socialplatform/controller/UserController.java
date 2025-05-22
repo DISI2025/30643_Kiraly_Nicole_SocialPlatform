@@ -150,5 +150,12 @@ public class UserController {
         return new ResponseEntity<>(requests, HttpStatus.OK);
     }
 
+    @GetMapping("/{userId}/friend-suggestions")
+    public ResponseEntity<List<UserDTO>> getFriendSuggestions(
+            @PathVariable UUID userId,
+            @RequestParam(defaultValue = "10") int limit) {
+        List<UserDTO> suggestions = userService.getFriendSuggestions(userId, limit);
+        return ResponseEntity.ok(suggestions);
+    }
 
 }

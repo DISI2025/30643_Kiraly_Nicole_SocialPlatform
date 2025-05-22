@@ -1,7 +1,6 @@
 package org.example.socialplatform.controller;
 
 
-import jakarta.transaction.Transactional;
 import org.example.socialplatform.config.JwtUtil;
 import org.example.socialplatform.dto.LoginRequest;
 import org.example.socialplatform.dto.LoginResponse;
@@ -20,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -103,7 +103,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @GetMapping("/user")
     public ResponseEntity<UserDTO> getUserData(@RequestHeader("Authorization") String authorizationHeader) {
         String jwtToken = authorizationHeader.substring(7);  // Remove "Bearer " prefix
