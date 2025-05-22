@@ -45,6 +45,7 @@ public class SecurityConfig{
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/register", "/auth/reset-password", "/auth/test").permitAll()
+                        .requestMatchers("/chat/**").permitAll()
                         .requestMatchers("/auth/user").authenticated()
                         .anyRequest().authenticated()
                 )
