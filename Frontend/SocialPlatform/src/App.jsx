@@ -10,7 +10,7 @@ import {UserProvider} from "./UserContext.jsx";
 import UserManagement from "./features/AdminUsers.jsx";
 import UserProfile from "./features/UserProfile.jsx";
 import AnotherProfile from "./features/AnotherProfile.jsx";
-
+import Chat from "./features/Chat.jsx"
 const AdminRoute = () => {
     const storedUser = localStorage.getItem("user"); // Get user role from session storage
     const user = JSON.parse(storedUser);
@@ -39,6 +39,7 @@ function App() {
                     <Route path="/profile" element={<UserProfile />} />
                     <Route path="/management-profile" element={<ProfileManagement />} />
                     <Route path="/another-profile" element={<AnotherProfile key={location.key}/>} />
+                    <Route path="/chat" element={<Chat />} />
                 </Routes>
             </div>
         </Router>

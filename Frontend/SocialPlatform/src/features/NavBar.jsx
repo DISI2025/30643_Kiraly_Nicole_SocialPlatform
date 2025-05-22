@@ -18,7 +18,7 @@ import { getUserData } from '../assets/api-profile.jsx';
 import { SearchIcon } from "lucide-react";
 import { Bell } from 'lucide-react';
 import { getPendingFriendRequests } from '../assets/api-profile';
-
+import { MessageCircle } from 'lucide-react';
 
 const Navbar = () => {
     const { user, logout } = useContext(UserContext);
@@ -65,7 +65,9 @@ const Navbar = () => {
         logout();
         navigate('/');
     };
-
+    const handleChatClick = () => {
+        navigate('/chat');
+    };
     const handleSearchChange = (event) => {
         const query = event.target.value;
         setSearchQuery(query);
@@ -201,7 +203,21 @@ const Navbar = () => {
                                 {user.firstName} {user.lastName}
                             </Typography>
                         </Link>
-
+                        {/* Butonul nou pentru chat */}
+                        <Button
+                            onClick={handleChatClick}
+                            variant="text"
+                            size="small"
+                            startIcon={<MessageCircle size={18} />}
+                            sx={{
+                                color: '#0c2734',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(12, 39, 52, 0.1)'
+                                }
+                            }}
+                        >
+                            Chat
+                        </Button>
                         <Button
                             onClick={handleLogout}
                             variant="outlined"
