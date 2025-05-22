@@ -161,3 +161,17 @@ export const rejectFriendRequest = async (senderId) => {
     }
 };
 
+export const getFriendSuggestions = async (userId, limit = 10) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_BASE_URL}/${userId}/friend-suggestions?limit=${limit}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    if (!response.ok) {
+        throw new Error("Failed to fetch friend suggestions");
+    }
+    return await response.json();
+};
+
+
