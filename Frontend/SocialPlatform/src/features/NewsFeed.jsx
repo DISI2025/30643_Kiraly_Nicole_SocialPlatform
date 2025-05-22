@@ -4,6 +4,8 @@ import '../styles/NewsFeed.css'; // Imported the stylesheet
 import {getUserFriends} from '../assets/api-profile';
 import Navbar from './NavBar.jsx';
 import {useNavigate} from "react-router-dom";
+import {getFriendSuggestions} from '../assets/api-profile';
+
 
 const NewsFeed = () => {
     const [posts, setPosts] = useState([]);
@@ -21,6 +23,8 @@ const NewsFeed = () => {
         navigate(`/another-profile?user=${friendId}`);
     };
     const [showFriends, setShowFriends] = useState(true);
+    const [suggestedFriends, setSuggestedFriends] = useState([]);
+
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -43,6 +47,16 @@ const NewsFeed = () => {
                 console.error("Error fetching friends", err);
             }
         };
+        const fetchFriendSuggestions = async () => {
+            try {
+                const suggestions = await getFriendSuggestions(user.id);
+                setSuggestedFriends(suggestions);
+            } catch (err) {
+                console.error("Error fetching suggestions", err);
+            }
+        };
+
+        fetchFriendSuggestions();
 
         fetchPosts();
         fetchFriends();
@@ -164,67 +178,130 @@ const NewsFeed = () => {
                     )}
 
                     {posts.length === 0 ? (
-                        <p className="noPosts">No posts available</p>
-                    ) : (
-                        posts.map(post => (
-                            <div key={post.id || `${post.description}-${Math.random()}`} className="post">
-                                <div className="postHeader" style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center'
-                                }}>
-                                    <div className="userInfo">
-                                        <h1 className="userNameWrapper">
-                                            <img
-                                                src={post.user?.image}
-                                                alt={post.user?.firstName}
-                                                className="userImage"
-                                            />
-                                            <span className="userName">
-                                            {post.user?.firstName} {post.user?.lastName}
-                                        </span>
-                                        </h1>
-                                        <p className="description">{post.description}</p>
+                        <>
+                            <p className="noPosts">No posts available</p>
+                            {suggestedFriends.length > 0 && (
+                                <div className="suggestedFriendsContainer">
+                                    <h2>Suggested Friends</h2>
+                                    <div className="suggestedFriendsList">
+                                        {suggestedFriends.map(friend => (
+                                            <div
+                                                key={friend.id}
+                                                className="suggestedFriendCard"
+                                                onClick={() => handleFriendClick(friend.id)}
+                                            >
+                                                <img
+                                                    src={friend.image || './default_image.jpg'}
+                                                    alt={`${friend.firstName} ${friend.lastName}`}
+                                                    className="suggestedFriendAvatar"
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src = './default_image.jpg';
+                                                    }}
+                                                />
+                                                <div className="suggestedFriendName">
+                                                    {friend.firstName} {friend.lastName}
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                    {user.role === 'ADMIN' &&
-                                        <div>
-                                            <button onClick={() => handleBlockPost(post.id)}
-                                                    style={{height: '100%', background: "none", color: "orangered"}}>⚠️
-                                                Block
-                                                post
-                                            </button>
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        posts.map((post, index) => (
+                            <React.Fragment key={post.id || `${post.description}-${Math.random()}`}>
+                                <div className="post">
+                                    <div className="postHeader" style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                                        <div className="userInfo">
+                                            <h1 className="userNameWrapper">
+                                                <img
+                                                    src={post.user?.image}
+                                                    alt={post.user?.firstName}
+                                                    className="userImage"
+                                                />
+                                                <span className="userName">
+                                {post.user?.firstName} {post.user?.lastName}
+                            </span>
+                                            </h1>
+                                            <p className="description">{post.description}</p>
                                         </div>
-                                    }
+                                        {user.role === 'ADMIN' && (
+                                            <div>
+                                                <button onClick={() => handleBlockPost(post.id)}
+                                                        style={{
+                                                            height: '100%',
+                                                            background: "none",
+                                                            color: "orangered"
+                                                        }}>
+                                                    ⚠️ Block post
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {post.image && (
+                                        <div className="postContent">
+                                            <img
+                                                src={post.image}
+                                                alt="Post"
+                                                className="postImage"
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div className="postFooter">
+                                        <div className="likes" onClick={() => handleLike(post.id)}>
+                                            {post.likes.includes(user.id)
+                                                ? (<span className="heart">♥</span>)
+                                                : (<span className="heart">♡</span>)}
+                                            <span>{post.noLikes}</span>
+                                        </div>
+                                        <span className="date">
+                        {post.date ? new Date(post.date).toLocaleString() : 'Date not available'}
+                    </span>
+                                    </div>
                                 </div>
 
-
-                                {post.image && (
-                                    <div className="postContent">
-                                        <img
-                                            src={post.image}
-                                            alt="Post"
-                                            className="postImage"
-                                        />
+                                {index === 0 && posts.length >= 1 && suggestedFriends.length > 0 &&(
+                                    <div className="suggestedFriendsContainer">
+                                        <h2>Suggested Friends</h2>
+                                        <div className="suggestedFriendsList">
+                                            {suggestedFriends.length === 0 ? (
+                                                <p>No suggestions right now.</p>
+                                            ) : (
+                                                suggestedFriends.map(friend => (
+                                                    <div
+                                                        key={friend.id}
+                                                        className="suggestedFriendCard"
+                                                        onClick={() => handleFriendClick(friend.id)}
+                                                    >
+                                                        <img
+                                                            src={friend.image || './default_image.jpg'}
+                                                            alt={`${friend.firstName} ${friend.lastName}`}
+                                                            className="suggestedFriendAvatar"
+                                                            onError={(e) => {
+                                                                e.target.onerror = null;
+                                                                e.target.src = './default_image.jpg';
+                                                            }}
+                                                        />
+                                                        <div className="suggestedFriendName">
+                                                            {friend.firstName} {friend.lastName}
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
                                     </div>
                                 )}
-
-                                <div className="postFooter">
-                                    <div
-                                        className="likes"
-                                        onClick={() => handleLike(post.id)}
-                                    >
-                                        {post.likes.includes(user.id)
-                                            ? (<span className="heart">♥</span>)
-                                            : (<span className="heart">♡</span>)}
-                                        <span>{post.noLikes}</span>
-                                    </div>
-                                    <span className="date">
-                                    {post.date ? new Date(post.date).toLocaleString() : 'Date not available'}
-                                </span>
-                                </div>
-                            </div>
+                            </React.Fragment>
                         ))
                     )}
+
                 </div>
                 <button
                     onClick={() => setShowFriends(!showFriends)}
