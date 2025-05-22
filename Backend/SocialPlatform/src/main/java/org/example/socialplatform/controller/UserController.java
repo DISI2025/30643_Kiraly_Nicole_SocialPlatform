@@ -2,6 +2,7 @@ package org.example.socialplatform.controller;
 
 import jakarta.transaction.Transactional;
 import org.example.socialplatform.config.JwtUtil;
+import org.example.socialplatform.dto.UserBuilder;
 import org.example.socialplatform.dto.UserDTO;
 import org.example.socialplatform.entity.User;
 import org.example.socialplatform.service.UserService;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
@@ -26,6 +28,7 @@ public class UserController {
         this.jwtUtil = jwtUtil;
     }
 
+    @Transactional
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> users = userService.getAllUsers();
@@ -39,12 +42,14 @@ public class UserController {
         return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
     }
 
+    @Transactional
     @GetMapping(value = "/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable("id") UUID userId) {
         UserDTO userDTO = userService.getUserById(userId);
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 
+    @Transactional
     @PutMapping(value = "/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable("id") UUID userId, @RequestBody UserDTO userDTO) {
         UserDTO user = userService.update(userId, userDTO);
@@ -58,6 +63,7 @@ public class UserController {
         return new ResponseEntity<>(userId, HttpStatus.OK);
     }
 
+    @Transactional
     @GetMapping("/friends")
     public ResponseEntity<List<UserDTO>> getFriendsOfLoggedUser(@RequestHeader("Authorization") String authorizationHeader) {
         String jwtToken = authorizationHeader.substring(7);  // Strip "Bearer "
@@ -70,6 +76,7 @@ public class UserController {
     }
 
 
+    @Transactional
     @PostMapping("/add-friend/{friendId}")
     public ResponseEntity<String> addFriend(
             @RequestHeader("Authorization") String authorizationHeader,
@@ -81,6 +88,7 @@ public class UserController {
         return ResponseEntity.ok("Friend added.");
     }
 
+    @Transactional
     @DeleteMapping("/remove-friend/{friendId}")
     public ResponseEntity<String> removeFriend(
             @RequestHeader("Authorization") String authorizationHeader,
@@ -91,4 +99,56 @@ public class UserController {
         userService.removeFriend(user.getId(), friendId);
         return ResponseEntity.ok("Friend removed.");
     }
+
+    @Transactional
+    @PostMapping("/request-friend/{receiverId}")
+    public ResponseEntity<String> requestFriend(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID receiverId) {
+        String jwt = authorizationHeader.substring(7);
+        String email = jwtUtil.extractEmail(jwt);
+        UserDTO sender = userService.findByEmail(email);
+
+        userService.sendFriendRequest(sender.getId(), receiverId);
+        return ResponseEntity.ok("Friend request sent.");
+    }
+
+    @Transactional
+    @PostMapping("/accept-friend/{senderId}")
+    public ResponseEntity<String> acceptFriendRequest(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID senderId) {
+        String jwt = authorizationHeader.substring(7);
+        String email = jwtUtil.extractEmail(jwt);
+        UserDTO receiver = userService.findByEmail(email);
+
+        userService.acceptFriendRequest(receiver.getId(), senderId);
+        return ResponseEntity.ok("Friend request accepted.");
+    }
+
+    @Transactional
+    @DeleteMapping("/reject-friend/{senderId}")
+    public ResponseEntity<String> rejectFriendRequest(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID senderId) {
+        String jwt = authorizationHeader.substring(7);
+        String email = jwtUtil.extractEmail(jwt);
+        UserDTO receiver = userService.findByEmail(email);
+
+        userService.rejectFriendRequest(receiver.getId(), senderId);
+        return ResponseEntity.ok("Friend request rejected.");
+    }
+    @Transactional
+    @GetMapping("/pending-requests")
+    public ResponseEntity<List<UserDTO>> getPendingFriendRequests(
+            @RequestHeader("Authorization") String authorizationHeader) {
+        String jwt = authorizationHeader.substring(7);
+        String email = jwtUtil.extractEmail(jwt);
+        UserDTO user = userService.findByEmail(email);
+        List<UserDTO> requests = userService.getPendingFriendRequests(user.getId());
+
+        return new ResponseEntity<>(requests, HttpStatus.OK);
+    }
+
+
 }

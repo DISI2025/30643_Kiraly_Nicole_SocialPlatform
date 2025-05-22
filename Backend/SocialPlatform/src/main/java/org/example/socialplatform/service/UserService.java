@@ -149,7 +149,10 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = "userFriends", key = "#userId.toString()")
+    @Caching(evict = {
+            @CacheEvict(value = "userFriends", key = "#userId.toString()"),
+            @CacheEvict(value = "userFriends", key = "#friendId.toString()")
+    })
     public void removeFriend(UUID userId, UUID friendId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new RuntimeException("Friend not found"));
@@ -157,10 +160,87 @@ public class UserService {
         if (user.getFriends().contains(friend)) {
             user.getFriends().remove(friend);
             friend.getFriends().remove(user);
+
             userRepository.save(user);
             userRepository.save(friend);
         }
     }
+
+
+    @CacheEvict(value = "users", key = "#receiverId.toString()")
+    @Transactional
+    public void sendFriendRequest(UUID senderId, UUID receiverId) {
+        if (senderId.equals(receiverId)) {
+            throw new RuntimeException("Cannot send a friend request to yourself.");
+        }
+
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new RuntimeException("Sender not found"));
+        User receiver = userRepository.findById(receiverId)
+                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+
+        boolean alreadyRequested = receiver.getFriendRequests().contains(sender);
+        boolean alreadyFriends = receiver.getFriends().contains(sender);
+
+        if (!alreadyRequested && !alreadyFriends) {
+            receiver.getFriendRequests().add(sender);
+            userRepository.save(receiver);
+        }
+    }
+
+
+
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "userFriends", key = "#receiverId.toString()"),
+            @CacheEvict(value = "userFriends", key = "#senderId.toString()")
+    })
+    public void acceptFriendRequest(UUID receiverId, UUID senderId) {
+        User receiver = userRepository.findById(receiverId)
+                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new RuntimeException("Sender not found"));
+
+        if (receiver.getFriendRequests().contains(sender)) {
+            receiver.getFriendRequests().remove(sender);
+            receiver.getFriends().add(sender);
+            sender.getFriends().add(receiver);
+
+            userRepository.save(receiver);
+            userRepository.save(sender);
+        } else {
+            throw new RuntimeException("No friend request from this user.");
+        }
+    }
+
+
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "userFriends", key = "#receiverId.toString()"),
+            @CacheEvict(value = "userFriends", key = "#senderId.toString()")
+    })
+    public void rejectFriendRequest(UUID receiverId, UUID senderId) {
+        User receiver = userRepository.findById(receiverId)
+                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new RuntimeException("Sender not found"));
+
+        receiver.getFriendRequests().remove(sender);
+        userRepository.save(receiver);
+    }
+
+
+    @Transactional
+    public List<UserDTO> getPendingFriendRequests(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return user.getFriendRequests().stream()
+                .map(UserBuilder::toUserDTO)
+                .collect(Collectors.toList());
+    }
+
+
 
 
 

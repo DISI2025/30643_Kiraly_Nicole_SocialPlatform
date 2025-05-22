@@ -2,10 +2,11 @@ package org.example.socialplatform.dto;
 
 import org.example.socialplatform.entity.User;
 
-public class UserBuilder {
-    private UserBuilder(){
+import java.util.stream.Collectors;
 
-    }
+public class UserBuilder {
+    private UserBuilder() {}
+
     public static UserDTO toUserDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
@@ -25,7 +26,23 @@ public class UserBuilder {
                         f.setLastName(friend.getLastName());
                         f.setImage(friend.getImage());
                         return f;
-                    }).toList());
+                    })
+                    .collect(Collectors.toSet()));  // <-- changed to toSet()
+
+        }
+
+        if (user.getFriendRequests() != null) {
+            dto.setFriendRequests(user.getFriendRequests().stream()
+                    .map(req -> {
+                        UserDTO requester = new UserDTO();
+                        requester.setId(req.getId());
+                        requester.setFirstName(req.getFirstName());
+                        requester.setLastName(req.getLastName());
+                        requester.setImage(req.getImage());
+                        return requester;
+                    })
+                    .collect(Collectors.toSet()));  // <-- changed to toSet()
+
         }
 
         return dto;

@@ -16,6 +16,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '../UserContext';
 import { getUserData } from '../assets/api-profile.jsx';
 import { SearchIcon } from "lucide-react";
+import { Bell } from 'lucide-react';
+import { getPendingFriendRequests } from '../assets/api-profile';
+
 
 const Navbar = () => {
     const { user, logout } = useContext(UserContext);
@@ -25,6 +28,9 @@ const Navbar = () => {
     const [allUsers, setAllUsers] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
+    const [friendRequests, setFriendRequests] = useState([]);
+    const [requestsAnchorEl, setRequestsAnchorEl] = useState(null);
+
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -40,6 +46,20 @@ const Navbar = () => {
 
         fetchUsers();
     }, []);
+
+    useEffect(() => {
+        const fetchFriendRequests = async () => {
+            try {
+                const requests = await getPendingFriendRequests();
+                setFriendRequests(requests);
+            } catch (err) {
+                console.error("Error fetching friend requests:", err);
+            }
+        };
+
+        fetchFriendRequests();
+    }, []);
+
 
     const handleLogout = () => {
         logout();
@@ -191,6 +211,71 @@ const Navbar = () => {
                             Logout
                         </Button>
                     </Box>
+                )}
+
+                {user && (
+                    <>
+                        <Button
+                            onClick={(e) => setRequestsAnchorEl(e.currentTarget)}
+                            sx={{ minWidth: 'auto', color: '#0c2734', position: 'relative' }}
+                        >
+                            <Bell size={22} />
+                            {friendRequests.length > 0 && (
+                                <Box
+                                    sx={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        right: 0,
+                                        backgroundColor: 'red',
+                                        color: 'white',
+                                        borderRadius: '50%',
+                                        width: 16,
+                                        height: 16,
+                                        fontSize: 10,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    {friendRequests.length}
+                                </Box>
+                            )}
+                        </Button>
+
+                        <Menu
+                            anchorEl={requestsAnchorEl}
+                            open={Boolean(requestsAnchorEl)}
+                            onClose={() => setRequestsAnchorEl(null)}
+                            PaperProps={{ style: { width: 300, maxHeight: 400 } }}
+                        >
+                            {friendRequests.length === 0 ? (
+                                <MenuItem disabled>No pending requests</MenuItem>
+                            ) : (
+                                friendRequests.map((req) => (
+                                    <MenuItem
+                                        key={req.id}
+                                        onClick={() => {
+                                            navigate(`/another-profile?user=${req.id}`);
+                                            setRequestsAnchorEl(null);
+                                        }}
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 2,
+                                            padding: '10px 15px',
+                                            '&:hover': { backgroundColor: '#f0f0f0' }
+                                        }}
+                                    >
+                                        <Avatar src={req.image || '/default-avatar.png'} />
+                                        <Box>
+                                            <Typography variant="body1">{req.firstName} {req.lastName}</Typography>
+                                            <Typography variant="body2" color="text.secondary">{req.email}</Typography>
+                                        </Box>
+                                    </MenuItem>
+                                ))
+                            )}
+                        </Menu>
+                    </>
                 )}
             </Toolbar>
         </AppBar>
