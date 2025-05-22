@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from 'reactstrap';
 import * as API_CHAT from '../assets/api-chat';
-import { getUserData } from "../assets/api-profile.jsx";
+import { getUserData, getUserFriends } from "../assets/api-profile.jsx";
 import '../styles/Chat.css';
 import Navbar from "./NavBar.jsx";
 
@@ -20,11 +20,13 @@ class Chat extends React.Component {
             isTyping: false,
             lastMessageSeen: false,
             lastSentMessageSeen: false, // Nou state pentru seen status
+            friends: [], // Added friends state
         };
     }
 
     componentDidMount() {
         this.fetchPersons();
+        this.fetchUserFriends();
         const userString = localStorage.getItem("user");
         if (userString) {
             try {
@@ -37,6 +39,18 @@ class Chat extends React.Component {
             }
         } else {
             console.warn("No user found in localStorage");
+        }
+    }
+
+    async fetchUserFriends() {
+        try {
+            const token = localStorage.getItem('token');
+            const friendsList = await getUserFriends(token);
+            console.log("User friends from API:", friendsList);
+            this.setState({ friends: friendsList });
+        } catch (error) {
+            console.error('Failed to fetch user friends:', error.message);
+            this.setState({ friends: [] });
         }
     }
 
@@ -232,24 +246,11 @@ class Chat extends React.Component {
     }
 
     getFriendshipStatus(person) {
-        const userString = localStorage.getItem("user");
-        if (!userString) return "Not A Friend";
+        const { friends } = this.state;
 
-        try {
-            const loggedUser = JSON.parse(userString);
-            const loggedUserId = loggedUser.id;
-
-            // Check if the person has a friends array and if the logged user's ID is in it
-            if (person.friends && Array.isArray(person.friends)) {
-                const isFriend = person.friends.some(friend => friend.id === loggedUserId);
-                return isFriend ? "Friend" : "Not A Friend";
-            }
-
-            return "Not A Friend";
-        } catch (error) {
-            console.error("Error parsing user from localStorage:", error);
-            return "Not A Friend";
-        }
+        // Check if the person's ID is in the friends list
+        const isFriend = friends.some(friend => friend.id === person.id);
+        return isFriend ? "Friend" : "Not A Friend";
     }
 
     formatTimestamp(timestamp) {
